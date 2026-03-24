@@ -1,1 +1,2 @@
+pnpm tasks:archive
 pnpm test:e2e

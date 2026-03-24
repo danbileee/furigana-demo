@@ -1,21 +1,11 @@
 ---
-description: Push current branch to remote, with doc validation when pushing to main
+description: Validate and update documentation to keep fresh contexts for AI workflow
 allowed_tools: [Bash, Read, Edit, Write, Glob, Grep]
 ---
 
-Push the current branch to remote. When targeting `main`, validate and update documentation before pushing.
-
 ## Process
 
-1. **Determine the target branch**: Check the current branch with `git branch --show-current` and identify the intended push target (default: current branch, or `main` if specified in `$ARGUMENTS`).
-
-2. **If the target is NOT `main`**: Run `git push` for that branch and stop.
-
-3. **If the target IS `main`**: Follow the steps below before pushing.
-
-### Main Branch Pre-Push Checklist
-
-**3-1. Compare remote vs local**
+**1. Compare remote vs local**
 
 Run the following to understand what has changed locally since the last push:
 
@@ -25,7 +15,7 @@ git log origin/main..HEAD --oneline
 git diff origin/main..HEAD --stat
 ```
 
-**3-2. Validate documentation**
+**2. Validate documentation**
 
 Review the diff and determine whether the following files need updating:
 
@@ -38,7 +28,7 @@ For each file:
 - Compare against what has changed in the local commits
 - If the file is outdated or missing information, update it to reflect the current state of the project
 
-**3-3. Commit documentation updates**
+**3. Commit documentation updates**
 
 If any documentation was updated:
 
@@ -46,6 +36,6 @@ If any documentation was updated:
 - Commit with: `docs: update README and CLAUDE.md to reflect latest changes`
 - Verify the commit was created with `git log --oneline -3`
 
-**3-4. Push to main**
+**4. Push to the remote**
 
-Run `git push origin main` (or `git push` if the upstream is already set).
+Run `git push`

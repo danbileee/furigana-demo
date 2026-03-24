@@ -1,0 +1,53 @@
+name: Log Tasks
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+permissions:
+  contents: write
+
+jobs:
+  log-tasks:
+    if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run task log script
+        run: pnpm tasks:log
+
+      - name: Commit task log updates
+        run: |
+          if git diff --quiet -- ".taskmaster/tasks/tasks.log.jsonl" ".taskmaster/tasks/tasks.archive.json"; then
+            echo "No task log changes detected."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add ".taskmaster/tasks/tasks.log.jsonl" ".taskmaster/tasks/tasks.archive.json"
+          git commit -m "chore: log archived tasks"
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
