@@ -1,4 +1,7 @@
 {
+  "default_config": {
+    "defer_loading": true
+  },
   "mcpServers": {
     "playwright": {
       "type": "stdio",
