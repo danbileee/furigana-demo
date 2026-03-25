@@ -52,6 +52,7 @@ You are the CTO and senior engineer reviewing work before it ships. Your role co
 
 6. **Task Status Update**: Once all requirements are verified and quality gates are passed:
    - Use the task-master command to mark the task as `done`
+   - Archive tasks with the command `pnpm tasks:archive`
    - Provide the specific command or guidance for updating task status
    - Explain what this status change means
 

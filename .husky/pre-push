@@ -1,6 +1,1 @@
-pnpm tasks:archive
-if [ -n "$(git status --porcelain)" ]; then
-  git add -A
-  git commit -m "chore: archive tasks"
-fi
 pnpm test:e2e

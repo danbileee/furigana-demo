@@ -20,7 +20,6 @@ git diff origin/main..HEAD --stat
 Review the diff and determine whether the following files need updating:
 
 - `README.md` (root level) — update if new features, setup steps, commands, or project structure have changed
-- `.claude/CLAUDE.md` — update if new tools, conventions, workflow rules, or project patterns have been introduced
 
 For each file:
 
@@ -32,8 +31,8 @@ For each file:
 
 If any documentation was updated:
 
-- Stage only the changed doc files: `git add README.md .claude/CLAUDE.md`
-- Commit with: `docs: update README and CLAUDE.md to reflect latest changes`
+- Stage only the changed doc files: `git add README.md`
+- Commit with: `docs: update README to reflect latest changes`
 - Verify the commit was created with `git log --oneline -3`
 
 **4. Push to the remote**
