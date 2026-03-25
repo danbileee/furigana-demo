@@ -1,6 +1,6 @@
-# CLAUDE.md
+# CLAUDE.md — Furigana Project
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Development guidance for working on the Furigana web application.
 
 ## Prerequisites
 
@@ -22,10 +22,10 @@ pnpm build
 # Serve the production build locally
 pnpm start
 
-# Type-check (react-router typegen + tsc)
+# Type-check + tsc
 pnpm type-check
 
-# Run unit and integration tests (vitest)
+# Run unit and integration tests
 pnpm test
 
 # Run E2E tests (Playwright)
@@ -43,81 +43,81 @@ pnpm exec eslint . --fix
 # Format code with Prettier
 pnpm exec prettier --write .
 
-# Run pre-commit checks (lint-staged)
+# Run pre-commit checks
 pnpm exec lint-staged
 ```
 
-## Project structure
+## Code Quality Workflow
+
+**When changing code, always run this sequence:**
+
+```bash
+pnpm type-check    # TypeScript type checking
+pnpm exec eslint . --fix  # Lint and auto-fix
+pnpm test          # Unit and integration tests
+pnpm exec playwright test # E2E tests (if touching routes/UI)
+```
+
+This ensures all changes meet type safety, code style, and functional requirements before committing.
+
+## Project Structure
 
 ```
 app/
-├── instrument.ts            Sentry initialization (imported first)
-├── root.tsx                 HTML shell, Layout, ErrorBoundary
-├── entry.client.tsx         Client hydration with Sentry callbacks
-├── routes.ts                Route config (React Router framework mode)
-├── app.css                  Global styles, Tailwind v4 entrypoint
+├── instrument.ts            # Sentry initialization (imported first)
+├── root.tsx                 # HTML shell, Layout, ErrorBoundary
+├── entry.client.tsx         # Client hydration with Sentry callbacks
+├── routes.ts                # Route config (React Router v7 framework mode)
+├── app.css                  # Global styles, Tailwind v4 entrypoint
 ├── lib/
 │   ├── axios/
-│   │   └── instance.ts      Axios client with auth token + 401 interceptor
-│   └── utils.ts             cn() helper (clsx + tailwind-merge)
+│   │   └── instance.ts      # Axios client with auth token + 401 interceptor
+│   └── utils.ts             # cn() helper (clsx + tailwind-merge)
 ├── components/
-│   └── ui/                  shadcn/ui components
-├── routes/                  Route components
-├── schema/                  Zod schemas
-├── services/                Business logic (furigana, token storage)
-├── constants/               App constants
-├── test/                    Test setup and utilities
-├── public/                  Static assets
-└── api/                     Backend API routes (if any)
+│   └── ui/                  # shadcn/ui components
+├── routes/                  # Route components
+├── schema/                  # Zod schemas for validation
+├── services/                # Business logic (furigana processing, storage)
+├── constants/               # App constants
+├── test/                    # Test setup and utilities
+├── public/                  # Static assets
+└── api/                     # Backend API routes (if any)
 ```
 
-## Environment variables
+## Technology Stack
 
-Create `.env` in the project root:
+- **Framework**: React Router v7 (SSR enabled)
+- **Styling**: Tailwind CSS v4 + shadcn/ui
+- **Language**: TypeScript (strict mode with `exactOptionalPropertyTypes`)
+- **Testing**: Vitest + Playwright
+- **Code Quality**: ESLint + Prettier + Husky hooks
+- **Data**: Turso (SQLite) for persistent storage
+- **Monitoring**: Sentry for error tracking
 
-```
-VITE_SENTRY_DSN=
-```
+## Domain Terms & Entities
 
-## React Router v7 frontend
+See [Domain Terms](./rules/domain.md) for detailed definitions of core entities used in this project.
 
-- **SSR enabled** (`ssr: true` in `react-router.config.ts`). Routes are defined in `app/routes.ts` with the `@react-router/dev/routes` API.
-- **Data fetching**: Use `loader` for SSR data and `clientLoader` for client-only fetches.
-- **Sentry**: `instrument.ts` imported first in both `root.tsx` and `entry.client.tsx`. Use manual `captureException` in `hydrateRoot` error callbacks (avoids incompatibility with `exactOptionalPropertyTypes`).
-- **API client**: `app/lib/axios/instance.ts` exports a pre-configured Axios instance with:
-  - Base URL from `VITE_API_BASE_URL`
-  - Authorization header with token from `localStorage`
-  - Auto-redirect to `/login` on 401
-- **shadcn/ui**: Components live in `app/components/ui/`. Add new ones with `pnpx shadcn@latest add <component> --defaults`.
-- **Path alias**: `~/` maps to `app/` (defined in `tsconfig.json`).
+Key concepts:
 
-## TypeScript configuration
+- **Furigana**: Japanese paragraph with annotated phonetic readings above/alongside kanji
+- **Furigana Entry**: A stored annotation mapping kanji to its reading(s)
+- **Text Submission**: User-provided Japanese text awaiting annotation
+- **Storage**: Turso database storing user submissions and annotations
 
-- **Compiler**: `tsconfig.json` sets `moduleResolution: Bundler` (Vite target).
-- **Strict mode**: Enables `exactOptionalPropertyTypes`, `noUncheckedIndexedAccess`, `noImplicitOverride`, `noPropertyAccessFromIndexSignature`.
-- **Type imports**: ESLint enforces `consistent-type-imports` with inline style (`import type {}`).
-- **No `any`, no `as` casts**: Use `satisfies` operator or proper generics instead.
+## Key Principles
 
-## Testing
-
-- **Unit & integration tests**: Vitest with v8 coverage provider (`vitest.config.ts`)
-- **E2E tests**: Playwright configured in `playwright.config.ts` (run with `pnpm exec playwright test`)
-- **Test files**: Co-located with source code using `.test.ts` or `.test.tsx` suffix
-- **Coverage**: v8 provider enabled for detailed coverage reports
-
-## ESLint & Prettier
-
-- **Config**: Single flat config at `eslint.config.mjs`.
-- **Prettier integration**: Runs last in the ESLint chain to disable conflicting formatting rules.
-- **Pre-commit hooks**: `lint-staged` runs ESLint and Prettier on staged files via Husky.
-- **Pre-push hooks**: Runs type-check and tests before push (`.husky/pre-push`).
+1. **Type Safety First**: No `any`, no `as` casts. Use `satisfies` or proper generics.
+2. **Test Everything**: Type-check, lint, and test before committing.
+3. **React Modern**: Prefer hooks, transitions, and deferred updates over older patterns.
+4. **Explicit Over Implicit**: Clear domain terms, obvious intent, minimal magic.
+5. **Performance Matters**: Measure before optimizing; use profiling tools for data-heavy flows.
 
 ## Git Hooks
 
 - **Pre-commit** (`.husky/pre-commit`): Runs `lint-staged` to lint and format staged files
-- **Pre-push** (`.husky/pre-push`): Runs `pnpm type-check` and `pnpm test` before pushing
+- **Pre-push** (`.husky/pre-push`): Runs `pnpm type-check` and `pnpm test`
 
-## Task Master AI Instructions
+## CI/CD
 
-**Import Task Master's development workflow commands and guidelines, treat as if import is in the main CLAUDE.md file.**
-@./.taskmaster/CLAUDE.md
+Deployment and release workflows are configured via GitHub Actions. See `.github/workflows/` for details.
