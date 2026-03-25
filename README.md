@@ -22,7 +22,7 @@ pnpm type-check    # react-router typegen + tsc --noEmit
 
 ## Environment variables
 
-Create `apps/web/.env`:
+Create `.env` in the project root:
 
 ```
 VITE_API_BASE_URL=http://localhost:3000
@@ -39,7 +39,8 @@ app/
 ├── routes.ts             Route config (React Router framework mode)
 ├── app.css               Global styles, Tailwind CSS v4 entrypoint
 ├── lib/
-│   ├── api.ts            Axios instance with auth token + 401 interceptors
+│   ├── axios/
+│   │   └── instance.ts   Axios instance with auth token + 401 interceptors
 │   └── utils.ts          cn() helper (clsx + tailwind-merge)
 ├── components/
 │   └── ui/               shadcn/ui components (Button, Card, …)
@@ -53,7 +54,7 @@ Routes are declared in `app/routes.ts` using the `@react-router/dev/routes` API.
 
 ## API client
 
-`app/lib/api.ts` exports a pre-configured Axios instance:
+`app/lib/axios/instance.ts` exports a pre-configured Axios instance:
 
 - Base URL from `VITE_API_BASE_URL`
 - Attaches `Authorization: Bearer <token>` from `localStorage`
