@@ -25,6 +25,15 @@ pnpm start
 # Type-check (react-router typegen + tsc)
 pnpm type-check
 
+# Run unit and integration tests (vitest)
+pnpm test
+
+# Run E2E tests (Playwright)
+pnpm exec playwright test
+
+# Debug E2E tests in headed mode
+pnpm exec playwright test --headed
+
 # Lint code
 pnpm exec eslint .
 
@@ -55,8 +64,11 @@ app/
 │   └── ui/                  shadcn/ui components
 ├── routes/                  Route components
 ├── schema/                  Zod schemas
-├── welcome/                 Welcome page/component
-└── public/                  Static assets
+├── services/                Business logic (furigana, token storage)
+├── constants/               App constants
+├── test/                    Test setup and utilities
+├── public/                  Static assets
+└── api/                     Backend API routes (if any)
 ```
 
 ## Environment variables
@@ -86,12 +98,24 @@ VITE_SENTRY_DSN=
 - **Type imports**: ESLint enforces `consistent-type-imports` with inline style (`import type {}`).
 - **No `any`, no `as` casts**: Use `satisfies` operator or proper generics instead.
 
+## Testing
+
+- **Unit & integration tests**: Vitest with v8 coverage provider (`vitest.config.ts`)
+- **E2E tests**: Playwright configured in `playwright.config.ts` (run with `pnpm exec playwright test`)
+- **Test files**: Co-located with source code using `.test.ts` or `.test.tsx` suffix
+- **Coverage**: v8 provider enabled for detailed coverage reports
+
 ## ESLint & Prettier
 
 - **Config**: Single flat config at `eslint.config.mjs`.
-- **NestJS API exceptions**: `apps/api/**/*.ts` relaxes `no-unsafe-call`, `no-unsafe-member-access`, and `no-unsafe-assignment` for decorators.
 - **Prettier integration**: Runs last in the ESLint chain to disable conflicting formatting rules.
 - **Pre-commit hooks**: `lint-staged` runs ESLint and Prettier on staged files via Husky.
+- **Pre-push hooks**: Runs type-check and tests before push (`.husky/pre-push`).
+
+## Git Hooks
+
+- **Pre-commit** (`.husky/pre-commit`): Runs `lint-staged` to lint and format staged files
+- **Pre-push** (`.husky/pre-push`): Runs `pnpm type-check` and `pnpm test` before pushing
 
 ## Task Master AI Instructions
 
