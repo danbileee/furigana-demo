@@ -1,17 +1,16 @@
 import { desc, sql } from "drizzle-orm";
 import { sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
+import { baseColumns } from "./base.db";
 
 export const furiganas = sqliteTable(
   "furiganas",
   {
-    id: text("id").primaryKey(),
+    ...baseColumns,
     rawText: text("raw_text").notNull(),
     /** First 30 chars of rawText, computed at insert time. Max 30 characters. */
     rawTextSnippet: text("raw_text_snippet").notNull(),
     annotationString: text("annotation_string").notNull(),
     title: text("title"),
-    /** ISO 8601 UTC timestamp string (Date#toISOString) for lexicographic ordering. */
-    createdAt: text("created_at").notNull(),
     deletedAt: text("deleted_at"),
   },
   (table) => [
@@ -21,5 +20,5 @@ export const furiganas = sqliteTable(
   ],
 );
 
-export type Furigana = typeof furiganas.$inferSelect;
-export type NewFurigana = typeof furiganas.$inferInsert;
+export type FuriganaRow = typeof furiganas.$inferSelect;
+export type FuriganaInsert = typeof furiganas.$inferInsert;

@@ -8,6 +8,13 @@
       "when": 1774509718533,
       "tag": "0000_create_furiganas_table",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1774525619919,
+      "tag": "0001_apply_base_schema",
+      "breakpoints": true
     }
   ]
 }

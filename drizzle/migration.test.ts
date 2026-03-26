@@ -36,7 +36,7 @@ describe("migration SQL guard", () => {
     expect(combinedSql).toMatch(/CREATE\s+TABLE\s+[`"]furiganas[`"]/iu);
   });
 
-  test.skipIf(!hasMigrations)("contains all 7 required furiganas columns", () => {
+  test.skipIf(!hasMigrations)("contains all 8 required furiganas columns", () => {
     const expectedColumns = [
       "id",
       "raw_text",
@@ -44,6 +44,7 @@ describe("migration SQL guard", () => {
       "annotation_string",
       "title",
       "created_at",
+      "updated_at",
       "deleted_at",
     ];
 
