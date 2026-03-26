@@ -1,4 +1,4 @@
-import { sql } from "drizzle-orm";
+import { desc, sql } from "drizzle-orm";
 import { sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 
 export const furiganas = sqliteTable(
@@ -14,7 +14,7 @@ export const furiganas = sqliteTable(
   },
   (table) => [
     uniqueIndex("idx_furiganas_active_cursor")
-      .on(table.createdAt, table.id)
+      .on(desc(table.createdAt), desc(table.id))
       .where(sql`${table.deletedAt} IS NULL`),
   ],
 );

@@ -779,10 +779,10 @@ surface to test via Playwright.
 - [x] Phase 3.1: `app/lib/db/client.ts` created with startup validation
 - [x] Phase 3.2: `pnpm type-check` passes after client creation
 - [x] Phase 4.1: `drizzle.config.ts` created at repo root
-- [ ] Phase 5.1: `pnpm exec drizzle-kit generate` runs without errors
-- [ ] Phase 5.2: Generated SQL verified — all 7 columns present
-- [ ] Phase 5.3: Generated SQL verified — `idx_furiganas_active_cursor` present with DESC columns
-- [ ] Phase 5.4: Generated SQL verified — `WHERE` clause has column name, not `$1` placeholder
+- [x] Phase 5.1: `pnpm exec drizzle-kit generate` runs without errors
+- [x] Phase 5.2: Generated SQL verified — all 7 columns present
+- [x] Phase 5.3: Generated SQL verified — `idx_furiganas_active_cursor` present with DESC columns
+- [x] Phase 5.4: Generated SQL verified — `WHERE` clause has column name, not `$1` placeholder
 - [ ] Phase 6.1: `app/lib/db/schema.test.ts` created (10 tests including structural validation and type assertions)
 - [ ] Phase 6.2: `app/lib/db/client.test.ts` created (10 tests including 3 high-priority edge cases)
 - [ ] Phase 6.3: `app/lib/db/migration.test.ts` created (5 tests — migration guard)
