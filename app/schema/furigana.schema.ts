@@ -1,4 +1,6 @@
 import * as z from "zod";
+import { PaginationResultsSchema } from "~/schema/pagination.schema";
+import { BaseEntitySchema } from "./base.schema";
 
 /**
  * @schema
@@ -37,3 +39,46 @@ export function isTextToken(token: FuriganaToken): token is TextToken {
 export function isRubyToken(token: FuriganaToken): token is RubyToken {
   return token.type === "ruby";
 }
+
+// --- Database schemas ---
+
+export const FuriganaEntityRowSchema = z.object({
+  ...BaseEntitySchema.shape,
+  rawText: z.string().max(5000),
+  rawTextSnippet: z.string().max(30),
+  annotationString: z.string(),
+  title: z.string().nullable(),
+  deletedAt: z.iso.datetime().nullable(),
+});
+
+export type FuriganaEntityRow = z.infer<typeof FuriganaEntityRowSchema>;
+
+export const FuriganaEntityInsertSchema = FuriganaEntityRowSchema.extend({
+  title: FuriganaEntityRowSchema.shape.title.optional(),
+  updatedAt: FuriganaEntityRowSchema.shape.updatedAt.optional(),
+}).pick({
+  id: true,
+  rawText: true,
+  rawTextSnippet: true,
+  annotationString: true,
+  title: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type FuriganaEntityInsert = z.infer<typeof FuriganaEntityInsertSchema>;
+
+export const FuriganaPaginationResultSchema = FuriganaEntityRowSchema.pick({
+  id: true,
+  rawTextSnippet: true,
+  title: true,
+  createdAt: true,
+});
+
+export type FuriganaPaginationResult = z.infer<typeof FuriganaPaginationResultSchema>;
+
+export const FuriganaPaginationResultsSchema = PaginationResultsSchema(
+  FuriganaPaginationResultSchema,
+);
+
+export type FuriganaPaginationResults = z.infer<typeof FuriganaPaginationResultsSchema>;
