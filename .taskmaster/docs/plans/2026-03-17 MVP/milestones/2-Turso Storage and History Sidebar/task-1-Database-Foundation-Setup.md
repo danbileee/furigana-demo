@@ -774,8 +774,8 @@ surface to test via Playwright.
 - [x] Phase 1.1: `pnpm add @libsql/client drizzle-orm` — production deps installed
 - [x] Phase 1.2: `pnpm add -D drizzle-kit` — dev dep installed
 - [x] Phase 1.3: Verify `drizzle-orm` version ≥0.30.0 in `pnpm-lock.yaml`
-- [ ] Phase 2.1: `app/lib/db/schema.ts` created with all 7 columns and partial index
-- [ ] Phase 2.2: `pnpm type-check` passes after schema creation
+- [x] Phase 2.1: `app/lib/db/schema.ts` created with all 7 columns and partial index
+- [x] Phase 2.2: `pnpm type-check` passes after schema creation
 - [ ] Phase 3.1: `app/lib/db/client.ts` created with startup validation
 - [ ] Phase 3.2: `pnpm type-check` passes after client creation
 - [ ] Phase 4.1: `drizzle.config.ts` created at repo root
