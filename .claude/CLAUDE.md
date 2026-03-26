@@ -98,6 +98,10 @@ app/
 
 See [Domain Terms](./rules/domain.md) for detailed definitions of core entities used in this project.
 
+## Backend Rules
+
+See [Migration Conventions](./rules/backend/migration.md) for rules on creating and naming database migrations.
+
 ## Key Principles
 
 1. **Type Safety First**: No `any`, no `as` casts. Use `satisfies` or proper generics.

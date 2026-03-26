@@ -588,15 +588,15 @@ const _zodInsertToDrizzle = {} as FuriganaInsert satisfies NewFurigana;
 
 ## Implementation Checklist
 
-- [ ] `app/schema/pagination.schema.ts` created with `CursorSchema`, `PaginationResultsSchema`, `CursorPaginationParams`, `PaginationResults<T>`
-- [ ] `app/schema/pagination.schema.test.ts` created with all `CursorSchema` and factory test cases (including `nextCursor` absent rejection and `data` non-array rejection)
-- [ ] `app/schema/furigana.schema.ts` extended with `FuriganaRowSchema`, `FuriganaInsertSchema`, `FuriganaSidebarSchema`, `FuriganaPaginationResultsSchema` and their inferred types
-- [ ] `app/schema/furigana.schema.test.ts` extended with Drizzle type alignment suite and DB schema test suites (existing tests untouched)
-- [ ] Vitest coverage config verified to include `app/schema/**/*.ts` (Phase 3 check)
-- [ ] `pnpm type-check` passes with zero errors
-- [ ] `pnpm exec eslint . --fix` runs cleanly
-- [ ] `pnpm test` passes all tests (existing + new)
-- [ ] No `drizzle-zod` package installed or imported
+- [x] `app/schema/pagination.schema.ts` created with `CursorSchema`, `PaginationResultsSchema`, `CursorPaginationParams`, `PaginationResults<T>`
+- [x] `app/schema/pagination.schema.test.ts` created with all `CursorSchema` and factory test cases (including `nextCursor` absent rejection and `data` non-array rejection)
+- [x] `app/schema/furigana.schema.ts` extended with `FuriganaRowSchema`, `FuriganaInsertSchema`, `FuriganaSidebarSchema`, `FuriganaPaginationResultsSchema` and their inferred types
+- [x] `app/schema/furigana.schema.test.ts` extended with Drizzle type alignment suite and DB schema test suites (existing tests untouched)
+- [x] Vitest coverage config verified to include `app/schema/**/*.ts` (Phase 3 check)
+- [x] `pnpm type-check` passes with zero errors
+- [x] `pnpm exec eslint . --fix` runs cleanly
+- [x] `pnpm test` passes all tests (existing + new)
+- [x] No `drizzle-zod` package installed or imported
 
 ---
 
