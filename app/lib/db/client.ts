@@ -12,7 +12,9 @@ if (!url) {
   );
 }
 
-if (authToken === undefined && !url.startsWith("file:")) {
+const isFileUrl = url.startsWith("file:");
+
+if (!isFileUrl && !authToken) {
   throw new Error(
     "Missing required environment variable: TURSO_AUTH_TOKEN. Set it in .env or your deployment config. (TURSO_AUTH_TOKEN may be empty for file: URLs.)",
   );

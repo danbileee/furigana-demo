@@ -65,6 +65,13 @@ describe("db client startup validation", () => {
     await expect(import("~/lib/db/client")).rejects.toThrow("TURSO_AUTH_TOKEN");
   });
 
+  it("throws when TURSO_AUTH_TOKEN is an empty string for libsql URLs", async () => {
+    process.env["TURSO_DATABASE_URL"] = "libsql://test.turso.io";
+    process.env["TURSO_AUTH_TOKEN"] = "";
+
+    await expect(import("~/lib/db/client")).rejects.toThrow("TURSO_AUTH_TOKEN");
+  });
+
   it("throws when TURSO_AUTH_TOKEN is undefined for non-file URLs", async () => {
     process.env["TURSO_DATABASE_URL"] = "https://example.turso.io";
     delete process.env["TURSO_AUTH_TOKEN"];
@@ -118,6 +125,19 @@ describe("db client startup validation", () => {
     expect(createClientMock).toHaveBeenCalledWith({
       url: "libsql://test.turso.io",
       authToken: "test-token",
+    });
+  });
+
+  it("calls createClient with empty authToken for file URLs when token is undefined", async () => {
+    process.env["TURSO_DATABASE_URL"] = "file:local.db";
+    delete process.env["TURSO_AUTH_TOKEN"];
+
+    await import("~/lib/db/client");
+
+    expect(createClientMock).toHaveBeenCalledTimes(1);
+    expect(createClientMock).toHaveBeenCalledWith({
+      url: "file:local.db",
+      authToken: "",
     });
   });
 });
