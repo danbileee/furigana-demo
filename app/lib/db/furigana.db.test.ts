@@ -108,6 +108,8 @@ describe("furiganas schema structure", () => {
     );
 
     expect(indexColumns).toHaveLength(2);
+    expect(indexColumns?.[0]).toBeTruthy();
+    expect(indexColumns?.[1]).toBeTruthy();
     expect(indexColumns?.[0]).toContain("created_at");
     expect(indexColumns?.[0]?.toLowerCase()).toContain("desc");
     expect(indexColumns?.[1]).toContain("id");

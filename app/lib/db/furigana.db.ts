@@ -6,9 +6,11 @@ export const furiganas = sqliteTable(
   {
     id: text("id").primaryKey(),
     rawText: text("raw_text").notNull(),
+    /** First 30 chars of rawText, computed at insert time. Max 30 characters. */
     rawTextSnippet: text("raw_text_snippet").notNull(),
     annotationString: text("annotation_string").notNull(),
     title: text("title"),
+    /** ISO 8601 UTC timestamp string (Date#toISOString) for lexicographic ordering. */
     createdAt: text("created_at").notNull(),
     deletedAt: text("deleted_at"),
   },
