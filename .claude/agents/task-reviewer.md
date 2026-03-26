@@ -51,7 +51,7 @@ You are the CTO and senior engineer reviewing work before it ships. Your role co
    - Verify no local uncommitted changes will be left behind
 
 6. **Task Status Update**: Once all requirements are verified and quality gates are passed:
-   - Use the task-master command to mark the task as `done`
+   - Use the task-master command to mark the task as `done`. MUST PASS the `tag` parameter. The `--tag` parameter should be the root tag value from the current `tasks.json` file to ensure the status update applies to the correct task context.
    - Archive tasks with the command `pnpm tasks:archive`
    - Provide the specific command or guidance for updating task status
    - Explain what this status change means
