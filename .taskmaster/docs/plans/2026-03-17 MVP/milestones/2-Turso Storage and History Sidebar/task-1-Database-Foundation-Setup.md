@@ -776,8 +776,8 @@ surface to test via Playwright.
 - [x] Phase 1.3: Verify `drizzle-orm` version ≥0.30.0 in `pnpm-lock.yaml`
 - [x] Phase 2.1: `app/lib/db/schema.ts` created with all 7 columns and partial index
 - [x] Phase 2.2: `pnpm type-check` passes after schema creation
-- [ ] Phase 3.1: `app/lib/db/client.ts` created with startup validation
-- [ ] Phase 3.2: `pnpm type-check` passes after client creation
+- [x] Phase 3.1: `app/lib/db/client.ts` created with startup validation
+- [x] Phase 3.2: `pnpm type-check` passes after client creation
 - [ ] Phase 4.1: `drizzle.config.ts` created at repo root
 - [ ] Phase 5.1: `pnpm exec drizzle-kit generate` runs without errors
 - [ ] Phase 5.2: Generated SQL verified — all 7 columns present
