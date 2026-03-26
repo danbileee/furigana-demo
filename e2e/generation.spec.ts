@@ -12,12 +12,21 @@ function submitButton(page: Page) {
 }
 
 function charCounter(page: Page) {
-  return page.locator("[data-state]");
+  return page.locator("form p[data-state]");
 }
 
 function errorAlert(page: Page) {
   return page.getByRole("alert");
 }
+
+async function typeTextareaValue(page: Page, value: string) {
+  await textarea(page).click();
+  await textarea(page).press("Meta+A");
+  await textarea(page).press("Backspace");
+  await textarea(page).pressSequentially(value);
+}
+
+test.describe.configure({ mode: "serial" });
 
 test.describe("Furigana generation flow", () => {
   test("generates furigana for valid Japanese input", async ({ page }) => {
@@ -25,7 +34,7 @@ test.describe("Furigana generation flow", () => {
     test.slow();
 
     await page.goto("/");
-    await textarea(page).fill("日本語を勉強しています");
+    await typeTextareaValue(page, "日本語を勉強しています");
     await submitButton(page).click();
 
     await page.waitForURL(/\/furigana\/.+/, { timeout: 30_000 });
@@ -42,7 +51,7 @@ test.describe("Furigana generation flow", () => {
     test.slow();
 
     await page.goto("/");
-    await textarea(page).fill("東京に行きました");
+    await typeTextareaValue(page, "東京に行きました");
     await textarea(page).press("Meta+Enter");
 
     await page.waitForURL(/\/furigana\/.+/, { timeout: 30_000 });
@@ -56,7 +65,8 @@ test.describe("Furigana generation flow", () => {
 
   test("re-disables submit button after textarea is cleared", async ({ page }) => {
     await page.goto("/");
-    await textarea(page).fill("日本語");
+    await typeTextareaValue(page, "abc");
+    await expect(textarea(page)).toHaveValue("abc");
     await expect(submitButton(page)).toBeEnabled();
     await textarea(page).clear();
     await expect(submitButton(page)).toBeDisabled();
@@ -64,7 +74,7 @@ test.describe("Furigana generation flow", () => {
 
   test("shows danger counter at 10,000 characters", async ({ page }) => {
     await page.goto("/");
-    await textarea(page).fill("あ".repeat(10_000));
+    await typeTextareaValue(page, "a".repeat(10_000));
 
     await expect(charCounter(page)).toHaveAttribute("data-state", "danger");
     await expect(charCounter(page)).toContainText("10,000 / 10,000");
@@ -74,7 +84,7 @@ test.describe("Furigana generation flow", () => {
   test("shows validation error for non-Japanese input and preserves text", async ({ page }) => {
     await page.goto("/");
     const inputText = "Hello, this is English only.";
-    await textarea(page).fill(inputText);
+    await typeTextareaValue(page, inputText);
     await submitButton(page).click();
 
     await expect(errorAlert(page)).toBeVisible({ timeout: 10_000 });
