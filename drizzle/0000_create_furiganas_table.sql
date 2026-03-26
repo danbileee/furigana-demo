@@ -8,4 +8,4 @@ CREATE TABLE `furiganas` (
 	`deleted_at` text
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX `idx_furiganas_active_cursor` ON `furiganas` (`created_at`,`id`) WHERE "furiganas"."deleted_at" IS NULL;
+CREATE UNIQUE INDEX `idx_furiganas_active_cursor` ON `furiganas` ("created_at" desc,"id" desc) WHERE "furiganas"."deleted_at" IS NULL;

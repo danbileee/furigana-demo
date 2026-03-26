@@ -60,7 +60,7 @@
       "indexes": {
         "idx_furiganas_active_cursor": {
           "name": "idx_furiganas_active_cursor",
-          "columns": ["created_at", "id"],
+          "columns": ["\"created_at\" desc", "\"id\" desc"],
           "isUnique": true,
           "where": "\"furiganas\".\"deleted_at\" IS NULL"
         }

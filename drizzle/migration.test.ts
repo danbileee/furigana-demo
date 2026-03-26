@@ -1,8 +1,7 @@
 import fs from "node:fs";
-import path from "node:path";
 import { describe, expect, test } from "vitest";
 
-const drizzleDir = path.resolve(process.cwd(), "drizzle");
+const drizzleDir = import.meta.dirname;
 const migrationFiles = fs.existsSync(drizzleDir)
   ? fs
       .readdirSync(drizzleDir)
@@ -13,7 +12,7 @@ const migrationFiles = fs.existsSync(drizzleDir)
 const hasMigrations = migrationFiles.length > 0;
 const combinedSql = hasMigrations
   ? migrationFiles
-      .map((fileName) => fs.readFileSync(path.join(drizzleDir, fileName), "utf8"))
+      .map((fileName) => fs.readFileSync(`${drizzleDir}/${fileName}`, "utf8"))
       .join("\n")
   : "";
 
