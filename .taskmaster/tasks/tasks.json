@@ -9,8 +9,9 @@
         "testStrategy": "Unit tests for CursorSchema validate correct cursor shapes and reject malformed data (missing fields, invalid types). Test PaginationResultsSchema factory with simple test schemas validates envelope structure (data array, nextCursor, hasMore) and rejects invalid shapes. Verify no total field is accepted. Test FuriganaInsertSchema rejects rawText over 5000 chars and rawTextSnippet over 30 chars. Test FuriganaRowSchema accepts valid database rows. Test FuriganaSidebarSchema validates sidebar projections. Test FuriganaPaginationResultsSchema composed schema validates paginated sidebar responses correctly.",
         "priority": "high",
         "dependencies": ["1"],
-        "status": "pending",
-        "subtasks": []
+        "status": "in-progress",
+        "subtasks": [],
+        "updatedAt": "2026-03-26T09:42:14.918Z"
       },
       {
         "id": "3",
@@ -128,7 +129,7 @@
       "created": "2026-03-25T06:36:19.604Z",
       "updated": "2026-03-25T06:36:19.604Z",
       "description": "Tasks for MVP-milestone-2 context",
-      "lastModified": "2026-03-26T08:02:46.331Z",
+      "lastModified": "2026-03-26T09:42:14.921Z",
       "taskCount": 11,
       "completedCount": 0,
       "tags": ["MVP-milestone-2"]
