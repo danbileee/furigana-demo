@@ -783,12 +783,12 @@ surface to test via Playwright.
 - [x] Phase 5.2: Generated SQL verified — all 7 columns present
 - [x] Phase 5.3: Generated SQL verified — `idx_furiganas_active_cursor` present with DESC columns
 - [x] Phase 5.4: Generated SQL verified — `WHERE` clause has column name, not `$1` placeholder
-- [ ] Phase 6.1: `app/lib/db/schema.test.ts` created (10 tests including structural validation and type assertions)
-- [ ] Phase 6.2: `app/lib/db/client.test.ts` created (10 tests including 3 high-priority edge cases)
-- [ ] Phase 6.3: `app/lib/db/migration.test.ts` created (5 tests — migration guard)
-- [ ] `pnpm test` — all new tests pass
-- [ ] `pnpm exec eslint . --fix` — no lint errors
-- [ ] `pnpm type-check` — final clean pass
+- [x] Phase 6.1: `app/lib/db/schema.test.ts` created (10 tests including structural validation and type assertions)
+- [x] Phase 6.2: `app/lib/db/client.test.ts` created (10 tests including 3 high-priority edge cases)
+- [x] Phase 6.3: `app/lib/db/migration.test.ts` created (5 tests — migration guard)
+- [x] `pnpm test` — all new tests pass
+- [x] `pnpm exec eslint . --fix` — no lint errors
+- [x] `pnpm type-check` — final clean pass
 
 ---
 

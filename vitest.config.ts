@@ -14,7 +14,7 @@ export default mergeConfig(
       globals: true,
       environment: "node",
       setupFiles: ["./app/test/setup.ts"],
-      include: ["app/**/*.test.ts", "app/**/*.test.tsx"],
+      include: ["app/**/*.test.ts", "app/**/*.test.tsx", "drizzle/**/*.test.ts"],
       exclude: ["e2e/**/*"],
       coverage: {
         provider: "v8",
