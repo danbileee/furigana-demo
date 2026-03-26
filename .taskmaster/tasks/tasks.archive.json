@@ -197,5 +197,22 @@
         "archivedAt": "2026-03-25T04:06:43.680Z"
       }
     ]
+  },
+  "MVP-milestone-2": {
+    "tasks": [
+      {
+        "id": "1",
+        "title": "Database Foundation Setup",
+        "description": "Install Turso dependencies and create Drizzle ORM schema with furiganas table including partial index for cursor pagination",
+        "details": "Install @libsql/client, drizzle-orm (>=0.30.0 for drizzle-orm/zod support), and drizzle-kit. Create app/lib/db/schema.ts defining the furiganas table with columns: id (TEXT PRIMARY KEY), raw_text (TEXT NOT NULL), raw_text_snippet (TEXT NOT NULL, computed at insert), annotation_string (TEXT NOT NULL), title (TEXT nullable), created_at (TEXT NOT NULL ISO 8601), deleted_at (TEXT nullable for soft-delete). Add unique partial index idx_furiganas_active_cursor on (created_at DESC, id DESC) WHERE deleted_at IS NULL for cursor-based pagination. Create app/lib/db/client.ts with Turso/libSQL client singleton using createClient() from @libsql/client, reading TURSO_DATABASE_URL and TURSO_AUTH_TOKEN from process.env. Implement startup validation that throws clear errors if env vars are missing (allow empty auth token for file: URLs). Configure drizzle.config.ts for versioned migrations pointing to the Turso database URL.",
+        "testStrategy": "Unit tests verify schema definition matches PRD spec (all columns, correct types, nullability). Test client.ts startup validation throws errors for missing env vars. Test client initialization succeeds with valid env vars. Verify drizzle.config.ts points to correct database. Run drizzle-kit generate to produce initial migration SQL and verify it contains the correct CREATE TABLE and CREATE INDEX statements.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2026-03-26T08:02:32.273Z",
+        "archivedAt": "2026-03-26T08:02:37.504Z"
+      }
+    ]
   }
 }
