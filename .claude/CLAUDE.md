@@ -98,13 +98,6 @@ app/
 
 See [Domain Terms](./rules/domain.md) for detailed definitions of core entities used in this project.
 
-Key concepts:
-
-- **Furigana**: Japanese paragraph with annotated phonetic readings above/alongside kanji
-- **Furigana Entry**: A stored annotation mapping kanji to its reading(s)
-- **Text Submission**: User-provided Japanese text awaiting annotation
-- **Storage**: Turso database storing user submissions and annotations
-
 ## Key Principles
 
 1. **Type Safety First**: No `any`, no `as` casts. Use `satisfies` or proper generics.
@@ -121,3 +114,7 @@ Key concepts:
 ## CI/CD
 
 Deployment and release workflows are configured via GitHub Actions. See `.github/workflows/` for details.
+
+## Task Master
+
+See [Task Master AI - Agent Integration Guide](../.taskmaster/CLAUDE.md) for detailed instructions when using task-master-ai.

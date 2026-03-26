@@ -12,15 +12,26 @@ The current active milestone directory is:
 
 Files already generated:
 
-- `1-prd-Core Generation Loop.md` — Milestone 1 Sub-PRD (source document)
-- `1-task-1-Install-Development-Dependencies.md` — Task 1 implementation plan
-- `1-task-5-Define-FuriganaToken-Types.md` — Task 5 implementation plan
-- `1-task-6-Implement-Annotation-String-Parser.md` — Task 6 implementation plan
-- `1-task-7-Write-Parser-Unit-Tests.md` — Task 7 implementation plan
-- `1-task-10-Implement-Route-Action-for-Furigana-Generation.md` — Task 10 plan
-- `1-task-11-Create-InputArea-Component.md` — Task 11 plan
-- `1-task-12-Create-ReadingView-Component.md` — Task 12 plan
-- `1-task-13-Add-Ruby-CSS-Base-Rules.md` — Task 13 plan
-- `1-task-14-Wire-Home-Route-with-Form-and-Conditional-Rendering.md` — Task 14 plan
+Milestone 1 — Core Generation Loop (`1-Core Generation Loop/`):
+
+- `task-1-Install-Development-Dependencies.md`
+- `task-2-Configure-Vitest.md`
+- `task-3-Configure-Playwright.md`
+- `task-4-Create-env-example.md`
+- `task-5-Define-FuriganaToken-Types.md`
+- `task-6-Implement-Annotation-String-Parser.md`
+- `task-7-Write-Parser-Unit-Tests.md`
+- `task-8-Create-OpenAI-Client-Module.md`
+- `task-9-Create-System-Prompt-Module.md`
+- `task-10-Implement-Route-Action-for-Furigana-Generation.md`
+- `task-11-Create-InputArea-Component.md`
+- `task-12-Create-ReadingView-Component.md`
+- `task-13-Add-Ruby-CSS-Base-Rules.md`
+- `task-14-Wire-Home-Route-with-Form-and-Conditional-Rendering.md`
+- `task-15-Write-E2E-Tests-with-Playwright.md`
+
+Milestone 2 — Turso Storage and History Sidebar (`2-Turso Storage and History Sidebar/`):
+
+- `task-1-Database-Foundation-Setup.md`
 
 The date flag pattern is `2026-03-17` and the full directory name is `2026-03-17 MVP`.
