@@ -35,9 +35,19 @@ Key patterns observed during Task 6 and Task 7 reviews:
 ## Module organization
 
 - `app/lib/furigana/` — parser and furigana-specific utilities
-- `app/lib/ai/` — AI-layer utilities (sanitize.ts, future: client.ts, prompts.ts). NOT furigana-specific.
+- `app/lib/ai/` — AI-layer utilities (sanitize.ts, client.ts, prompts.ts). NOT furigana-specific.
+- `app/lib/db/` — Drizzle ORM schema and server-only DB client singleton
 - `app/lib/axios/` — pre-configured Axios instance
 - `app/schema/` — Zod schemas and inferred types
+
+## Database layer conventions (M2 Task 1)
+
+- `app/lib/db/furigana.db.ts` — table definition using `sqliteTable` (Drizzle sqlite-core). `schema.ts` is a re-export barrel — this pattern keeps `drizzle.config.ts`'s schema path stable as more tables are added.
+- `app/lib/db/client.ts` — server-only singleton (module-level, not wrapped in a function). Uses `process.env["VAR"]` not `import.meta.env`. Follows same fail-fast validation pattern as `app/lib/ai/client.ts`.
+- Migration files in `drizzle/` are committed to the repo. Do NOT gitignore them.
+- Drizzle Issue #3349: the `$1` placeholder bug in partial index WHERE clauses. The workaround (using `sql\`${table.col} IS NULL\``column reference form) renders as the column name in SQLite dialect. Always verify generated SQL after`drizzle-kit generate`.
+- DESC index ordering requires the `desc()` helper from `drizzle-orm` in the `.on()` call — a plain column reference omits the direction modifier in the generated SQL.
+- `drizzle-zod` is intentionally NOT installed through M2 Task 1. Deferred to Task 3 to avoid zod v4 compatibility risk.
 
 ## E2E Test patterns (Task 15)
 

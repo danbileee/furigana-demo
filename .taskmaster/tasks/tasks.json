@@ -2,40 +2,29 @@
   "MVP-milestone-2": {
     "tasks": [
       {
-        "id": 1,
-        "title": "Database Foundation Setup",
-        "description": "Install Turso dependencies and create Drizzle ORM schema with furiganas table including partial index for cursor pagination",
-        "details": "Install @libsql/client, drizzle-orm (>=0.30.0 for drizzle-orm/zod support), and drizzle-kit. Create app/lib/db/schema.ts defining the furiganas table with columns: id (TEXT PRIMARY KEY), raw_text (TEXT NOT NULL), raw_text_snippet (TEXT NOT NULL, computed at insert), annotation_string (TEXT NOT NULL), title (TEXT nullable), created_at (TEXT NOT NULL ISO 8601), deleted_at (TEXT nullable for soft-delete). Add unique partial index idx_furiganas_active_cursor on (created_at DESC, id DESC) WHERE deleted_at IS NULL for cursor-based pagination. Create app/lib/db/client.ts with Turso/libSQL client singleton using createClient() from @libsql/client, reading TURSO_DATABASE_URL and TURSO_AUTH_TOKEN from process.env. Implement startup validation that throws clear errors if env vars are missing (allow empty auth token for file: URLs). Configure drizzle.config.ts for versioned migrations pointing to the Turso database URL.",
-        "testStrategy": "Unit tests verify schema definition matches PRD spec (all columns, correct types, nullability). Test client.ts startup validation throws errors for missing env vars. Test client initialization succeeds with valid env vars. Verify drizzle.config.ts points to correct database. Run drizzle-kit generate to produce initial migration SQL and verify it contains the correct CREATE TABLE and CREATE INDEX statements.",
-        "priority": "high",
-        "dependencies": [],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 2,
+        "id": "2",
         "title": "Generic Pagination and Domain Schemas",
         "description": "Create reusable pagination schemas and extend furigana domain schemas with database row types using drizzle-orm/zod",
         "details": "Create app/schema/pagination.schema.ts with CursorSchema (validates { createdAt: ISO datetime, id: UUID }), generic PaginationResultsSchema factory function accepting any Zod schema and returning pagination envelope ({ data: T[], nextCursor: string | null, hasMore: boolean }), CursorPaginationParams and PaginationResults<T> TypeScript utility types. Extend app/schema/furigana.schema.ts using createSelectSchema and createInsertSchema from drizzle-orm/zod to generate base schemas from the Drizzle table, then refine with domain validations. Add FuriganaRowSchema (full SELECT * shape with UUID and datetime refinements), FuriganaInsertSchema (rawText max 5000 chars, rawTextSnippet max 30 chars), FuriganaSidebarSchema (manual projection with id, rawTextSnippet, title nullable, createdAt), and FuriganaPaginationResultsSchema composed via PaginationResultsSchema(FuriganaSidebarSchema). Export TypeScript types for each schema.",
         "testStrategy": "Unit tests for CursorSchema validate correct cursor shapes and reject malformed data (missing fields, invalid types). Test PaginationResultsSchema factory with simple test schemas validates envelope structure (data array, nextCursor, hasMore) and rejects invalid shapes. Verify no total field is accepted. Test FuriganaInsertSchema rejects rawText over 5000 chars and rawTextSnippet over 30 chars. Test FuriganaRowSchema accepts valid database rows. Test FuriganaSidebarSchema validates sidebar projections. Test FuriganaPaginationResultsSchema composed schema validates paginated sidebar responses correctly.",
         "priority": "high",
-        "dependencies": [1],
+        "dependencies": ["1"],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": 3,
+        "id": "3",
         "title": "Database Query Functions with Cursor Pagination",
         "description": "Implement typed Drizzle query functions for insert, single fetch, and cursor-paginated list retrieval using row-value comparison",
         "details": "Create app/lib/db/queries.ts with insertFurigana() that accepts FuriganaInsert shape, computes rawTextSnippet as rawText.slice(0, 30), and inserts into furiganas table using Drizzle ORM. Implement getFuriganaById(id) that selects from furiganas WHERE id = :id AND deleted_at IS NULL, returning FuriganaRow | null. Implement listFuriganas({ cursor, limit }) with cursor-based pagination using row-value comparison: for first page (no cursor) ORDER BY created_at DESC, id DESC LIMIT :limit + 1; for subsequent pages WHERE (created_at, id) < (:cursorCreatedAt, :cursorId) AND deleted_at IS NULL ORDER BY created_at DESC, id DESC LIMIT :limit + 1. Decode base64 cursor to { createdAt, id } and validate with CursorSchema. Return { data: FuriganaSidebar[], nextCursor: string | null, hasMore: boolean } where nextCursor is base64-encoded cursor of the last item if more rows exist. No total COUNT(*) field.",
         "testStrategy": "Unit tests with in-memory SQLite (':memory:'). Test insertFurigana correctly writes entry and computes rawTextSnippet from rawText.slice(0, 30). Test getFuriganaById returns entry when exists and not soft-deleted, returns null for non-existent ID or soft-deleted entry. Test listFuriganas first page returns correct entries ordered by created_at DESC, id DESC. Test listFuriganas with valid cursor returns next page. Test listFuriganas returns nextCursor when more entries exist and null when on last page. Test hasMore is true/false correctly. Verify no total field in response. Test cursor stability: new inserts don't affect cursor-based traversal of older entries.",
         "priority": "high",
-        "dependencies": [1, 2],
+        "dependencies": ["1", "2"],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": 4,
+        "id": "4",
         "title": "Input Sanitization and Rate Limiting",
         "description": "Create enhanced sanitization function and in-memory rate limiter for form submissions",
         "details": "Create app/lib/sanitize.ts with sanitizeRawText() that: strips HTML tags using regex /(<([^>]+)>)/gi, removes C0/C1 control characters (U+0000-U+001F except tab/newline/CR, U+007F, U+0080-U+009F) and BiDi override characters (U+200E, U+200F, U+202A-U+202E, U+2066-U+2069), normalizes consecutive whitespace to single spaces while preserving double newlines (paragraph breaks), and trims leading/trailing whitespace. Create app/lib/rate-limit.ts with in-memory rate limiter using Map<string, { count: number; resetAt: number }> keyed by IP address, limit 10 requests per 60 seconds, reading IP from request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() or fallback 'unknown', clearing counters on 60-second interval.",
@@ -46,7 +35,7 @@
         "subtasks": []
       },
       {
-        "id": 5,
+        "id": "5",
         "title": "Update Furigana Service to Return Annotation String",
         "description": "Modify generateFurigana to return both annotation string and parsed tokens for database storage",
         "details": "Update app/services/furigana.service.ts generateFurigana() to return { annotationString: string; tokens: FuriganaToken[] } instead of just FuriganaToken[]. After GPT-4o-mini completion, extract annotationString from response, parse it via parseAnnotationString() to get tokens, and return both. The annotation string is stored in the database (serialization format), and tokens are used for immediate rendering. Update the return type signature and export both values. This is a breaking change requiring updates to the call site in home.tsx action.",
@@ -57,87 +46,92 @@
         "subtasks": []
       },
       {
-        "id": 6,
+        "id": "6",
         "title": "Integrate Database Persistence in Route Action",
         "description": "Replace in-memory token storage with Turso database writes in home.tsx action with sanitization, validation, and rate limiting",
         "details": "Update app/routes/home.tsx action to: apply rate limiting via rate limiter (10 req/IP/min), return 429 if exceeded; call sanitizeRawText() on submitted text; validate length max 5000 chars server-side via Zod; call generateFurigana() to get { annotationString, tokens }; validate annotation string by running parseAnnotationString(annotationString) to confirm parseable (if fails, return error with original text preserved); call insertFurigana({ id: crypto.randomUUID(), rawText: sanitized, rawTextSnippet: sanitized.slice(0, 30), annotationString, createdAt: new Date().toISOString() }); redirect to /furigana/:id with persisted ID. Remove token-storage.service import and setTokens() call. Update error handling to preserve textarea content on Turso write failure or annotation validation failure.",
         "testStrategy": "Integration tests verify: successful generation + Turso write returns redirect to /furigana/:id with UUID; Turso write failure returns error with preserved text; rate limit returns 429 after 10 requests; text over 5000 chars returns 400 error; malformed annotation string from GPT returns error without DB write; HTML tags stripped before processing; generated entry ID is valid UUID; annotation string validation via parseAnnotationString() succeeds before INSERT.",
         "priority": "high",
-        "dependencies": [3, 4, 5],
+        "dependencies": ["3", "4", "5"],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": 7,
+        "id": "7",
         "title": "Update Entry Loading to Read from Database",
         "description": "Replace in-memory token retrieval with Turso database query in furigana.$id.tsx loader",
         "details": "Update app/routes/furigana.$id.tsx loader to: call getFuriganaById(params.id) to fetch entry from Turso; if entry exists and not soft-deleted, parse entry.annotationString via parseAnnotationString() to get tokens; return { tokens } to component; if entry is null (not found or soft-deleted), throw 404 response to trigger error boundary. Remove token-storage.service import and consumeTokens() call. The loader no longer consumes entries—they persist across reloads.",
         "testStrategy": "Integration tests verify: valid entry ID loads from Turso and renders tokens; non-existent entry ID throws 404; soft-deleted entry (deleted_at IS NOT NULL) throws 404; page reload fetches same entry again (no consumption). E2E test: submit entry, navigate to /furigana/:id, reload page, verify entry still renders correctly.",
         "priority": "high",
-        "dependencies": [3],
+        "dependencies": ["3"],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": 8,
+        "id": "8",
         "title": "API Resource Routes for Sidebar Data",
         "description": "Create server-side API routes for cursor-paginated sidebar list and single entry fetch",
         "details": "Create app/routes/api/furiganas.ts resource route for GET /api/furiganas accepting query params cursor (optional base64 string) and limit (default 20, max 50). Validate params with Zod. Call listFuriganas({ cursor, limit }) and return JSON matching FuriganaPaginationResultsSchema shape. Handle invalid cursor by returning 400 with Zod error. Create app/routes/api/furiganas.$id.ts for GET /api/furiganas/:id. Call getFuriganaById(params.id), return entry if found (non-deleted), throw 404 if not found or soft-deleted. Both routes are server-only (no client bundling).",
         "testStrategy": "Integration tests verify: GET /api/furiganas returns paginated list with data, nextCursor, hasMore (no total field); GET /api/furiganas?limit=5 returns 5 entries with nextCursor if more exist; GET /api/furiganas?cursor=<valid> returns next page; GET /api/furiganas?cursor=invalid-base64 returns 400; GET /api/furiganas?limit=999 returns 400 (exceeds max 50); GET /api/furiganas/:id returns full entry; response includes rawTextSnippet from stored column (not computed SUBSTR).",
         "priority": "medium",
-        "dependencies": [3],
+        "dependencies": ["3"],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": 9,
+        "id": "9",
         "title": "TanStack Query Setup and API Client Layer",
         "description": "Install TanStack Query, create API client functions with Zod validation, and configure QueryClientProvider",
         "details": "Install @tanstack/react-query. Update app/lib/axios/instance.ts to remove Authorization header injection and 401 redirect interceptor (add TODO comment for future auth). Create app/lib/api/furiganas.ts with fetchFuriganaList(cursor?: string, limit = 20) using axios instance to GET /api/furiganas with params, validate response via FuriganaPaginationResultsSchema.parse(); and fetchFuriganaById(id) to GET /api/furiganas/:id, validate via FuriganaRowSchema.parse(). Create QueryClient with defaultOptions { queries: { retry: 1 } } (staleTime set per-query, not global). Note: QueryClientProvider will be added to layout in task 10.",
         "testStrategy": "Unit tests with MSW or axios-mock-adapter verify: fetchFuriganaList calls correct endpoint with params and validates response with Zod; fetchFuriganaList throws Zod error for malformed server response (e.g., missing hasMore); fetchFuriganaById calls correct URL and validates response. Test axios instance no longer includes Authorization header or 401 interceptor.",
         "priority": "medium",
-        "dependencies": [2, 8],
+        "dependencies": ["2", "8"],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": 10,
+        "id": "10",
         "title": "Layout Route with shadcn/ui Sidebar and TanStack Query Provider",
         "description": "Install shadcn/ui Sidebar, create layout route with QueryClientProvider, SidebarProvider, and outlet structure",
         "details": "Run pnpx shadcn@latest add sidebar --defaults to install shadcn/ui Sidebar component and dependencies (Sheet, Separator, Tooltip, Input, Skeleton). Create app/components/ClientOnly.tsx wrapper (renders null on server, children after useEffect). Create app/components/sidebar/SidebarSkeleton.tsx matching sidebar width (--sidebar-width CSS var). Create app/components/sidebar/SidebarErrorBoundary.tsx React ErrorBoundary wrapping AppSidebar with fallback UI ('Sidebar unavailable. Reload to try again.'). Create app/routes/layout.tsx with QueryClientProvider (from task 9 queryClient), SidebarProvider (defaultOpen=true), SidebarErrorBoundary, ClientOnly (fallback=<SidebarSkeleton />), AppSidebar placeholder (receives activeEntryId from useParams), SidebarInset with <Outlet /> for child routes. Update app/routes.ts to wrap existing index and furigana/:id routes in layout route. Add API resource routes from task 8 to routes config.",
         "testStrategy": "Verify shadcn/ui Sidebar components installed in app/components/ui/sidebar.tsx. Unit test ClientOnly renders null on server, children on client. Unit test SidebarErrorBoundary catches errors and renders fallback without crashing parent. Integration test layout route renders QueryClientProvider, SidebarProvider, SidebarInset, and Outlet. Verify routes.ts includes layout wrapper and API routes.",
         "priority": "high",
-        "dependencies": [9],
+        "dependencies": ["9"],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": 11,
+        "id": "11",
         "title": "AppSidebar Component with Infinite Scroll",
         "description": "Build sidebar component using shadcn/ui primitives, TanStack Query useInfiniteQuery, and cursor-based pagination with scroll position preservation",
         "details": "Create app/components/sidebar/AppSidebar.tsx using shadcn/ui Sidebar primitives: Sidebar (collapsible='offcanvas'), SidebarHeader (with 'New' button linking to /), SidebarContent (scrollable), SidebarFooter (empty for M2), SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton (asChild with Link, isActive prop), SidebarMenuSkeleton. Use useInfiniteQuery with queryKey ['furiganas', 'list'], queryFn calling fetchFuriganaList, initialPageParam undefined, getNextPageParam extracting nextCursor, staleTime: Infinity, refetchOnWindowFocus: false. Flatten pages to entries array. Render SidebarMenuSkeleton (5 items, showIcon=false) during isLoading. Render empty state ('No entries yet') when entries.length === 0. Render entry rows with rawTextSnippet (truncate class), formattedDate (simple 'Mar 21' format for M2), isActive highlighting via SidebarMenuButton. Render 'Load more' button when hasNextPage, calls fetchNextPage(), disabled during isFetchingNextPage. Implement scroll position preservation using scrollTopRef and scrollContainerRef on SidebarContent, restore scroll after data updates. Implement cache invalidation via route change detection (useLocation + useEffect) to invalidate ['furiganas', 'list'] when navigating to /furigana/:id.",
         "testStrategy": "Unit tests verify: AppSidebar renders SidebarMenuButton with isActive for active entry; renders SidebarMenuSkeleton during loading; renders empty state when no entries; renders 'Load more' when hasNextPage=true, hides when false. Integration tests with MSW verify: useInfiniteQuery fetches first page on mount; fetchNextPage called when 'Load more' clicked; cache invalidation triggered after route change to /furigana/:id. E2E test: submit entry, verify sidebar refreshes and new entry appears at top; click sidebar entry, verify main content updates; scroll sidebar, verify scroll position preserved across navigations.",
         "priority": "high",
-        "dependencies": [10],
+        "dependencies": ["10"],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": 12,
+        "id": "12",
         "title": "Cleanup, Migration, and Bundle Audit",
         "description": "Remove in-memory token storage, apply initial migration, add bundle audit CI step, and verify all integration points",
         "details": "Delete app/services/token-storage.service.ts and its test file (no longer needed). Remove <main> wrapper from home.tsx and furigana.$id.tsx (layout provides SidebarInset structure). Run drizzle-kit generate to create initial migration, then drizzle-kit migrate to apply to local dev database (file:local.db). Document turso db dump backup step in README before cloud migrations. Add bundle audit script to package.json or CI: grep client bundle output (build/client/assets/*.js) for '@libsql/client' and fail build if found (prevents accidental client-side bundling of server-only DB client). Update .env.example to include TURSO_DATABASE_URL and TURSO_AUTH_TOKEN with comments. Run pnpm type-check to verify zero TypeScript errors. Verify pnpm test passes all unit and integration tests. Run pnpm test:e2e to verify E2E submission flow, sidebar navigation, page reload persistence, and cursor pagination.",
         "testStrategy": "Verify token-storage.service.ts deleted and no imports remain. Verify <main> wrappers removed from home.tsx and furigana.$id.tsx. Verify migration files generated in drizzle/ directory and applied to local database (check with SELECT name FROM sqlite_master WHERE type='table'). Verify bundle audit script exists and fails when @libsql/client appears in client bundle (simulate by temporarily importing in client code). Run pnpm type-check (zero errors). Run pnpm test (all pass). Run pnpm test:e2e: submit entry, verify persisted across reload; verify sidebar lists entries; verify cursor pagination with 'Load more' button; verify 'New' button navigates to input; verify sidebar active state highlights current entry.",
         "priority": "medium",
-        "dependencies": [6, 7, 11],
+        "dependencies": ["6", "7", "11"],
         "status": "pending",
         "subtasks": []
       }
     ],
     "metadata": {
+      "version": "1.0.0",
       "created": "2026-03-25T06:36:19.604Z",
       "updated": "2026-03-25T06:36:19.604Z",
-      "description": "Tasks for MVP-milestone-2 context"
+      "description": "Tasks for MVP-milestone-2 context",
+      "lastModified": "2026-03-26T08:02:46.331Z",
+      "taskCount": 11,
+      "completedCount": 0,
+      "tags": ["MVP-milestone-2"]
     }
   }
 }

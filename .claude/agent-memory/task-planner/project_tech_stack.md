@@ -32,12 +32,20 @@ type: project
 - vite-tsconfig-paths: ^5.0.0
 - eslint: ^10.0.3 (flat config in eslint.config.mjs)
 
-### To Be Installed in Milestone 1 (Task 1)
+### Installed in Milestone 1
 
-- openai: ^6.31.0 (production)
+- openai: ^6.32.0 (production)
 - vitest: ^4.1.0 (dev)
 - @vitest/coverage-v8: ^4.1.0 (dev)
-- @playwright/test: ^1.58.0 (dev)
+- @playwright/test: ^1.58.2 (dev)
+- @testing-library/react: ^16.3.2 (dev)
+- jsdom: ^29.0.1 (dev)
+
+### To Be Installed in Milestone 2 (Task 1)
+
+- @libsql/client: latest ~0.17.x (production)
+- drizzle-orm: latest ~0.45.x (production, >=0.30.0 required for .where() on indexes)
+- drizzle-kit: latest ~0.45.x (dev)
 
 ## Key Configuration Facts
 
