@@ -21,8 +21,7 @@ type TasksFile = Record<string, MilestoneBucket>;
 type ArchiveFile = Record<string, { tasks: Task[] }>;
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const TASKS_PATH =
-  process.env["TASKMASTER_TASKS_PATH"] ?? resolve(ROOT, "tasks", "tasks.json");
+const TASKS_PATH = process.env["TASKMASTER_TASKS_PATH"] ?? resolve(ROOT, "tasks", "tasks.json");
 const ARCHIVE_PATH =
   process.env["TASKMASTER_ARCHIVE_PATH"] ?? resolve(ROOT, "tasks", "tasks.archive.json");
 
@@ -110,9 +109,7 @@ function main(): void {
   for (const [milestone, bucket] of Object.entries(tasksJson)) {
     const currentTasks = Array.isArray(bucket.tasks) ? bucket.tasks : [];
     const remaining = currentTasks.filter(shouldRemainInTasks);
-    const doneTasks = currentTasks
-      .filter(isDone)
-      .map((task) => withArchivedAt(task, now));
+    const doneTasks = currentTasks.filter(isDone).map((task) => withArchivedAt(task, now));
 
     const currentArchiveTasks = Array.isArray(nextArchive[milestone]?.tasks)
       ? nextArchive[milestone].tasks

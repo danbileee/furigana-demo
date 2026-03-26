@@ -36,7 +36,7 @@ The remaining scope falls into two areas:
 | Input sanitization          | `app/lib/furigana/sanitize.ts`          | Done                                                                                                |
 | Schema + type guards        | `app/schema/furigana.schema.ts`         | Done                                                                                                |
 | Home component tests        | `app/routes/home.test.tsx`              | 8 tests — all passing                                                                               |
-| Home action tests           | `app/routes/home.test.ts`              | 10 tests — 9 passing, 1 failing                                                                     |
+| Home action tests           | `app/routes/home.test.ts`               | 10 tests — 9 passing, 1 failing                                                                     |
 | Furigana loader tests       | `app/routes/furigana.$id.test.ts`       | 3 tests — all passing                                                                               |
 | Furigana component tests    | `app/routes/furigana.$id.test.tsx`      | 8 tests — all passing                                                                               |
 

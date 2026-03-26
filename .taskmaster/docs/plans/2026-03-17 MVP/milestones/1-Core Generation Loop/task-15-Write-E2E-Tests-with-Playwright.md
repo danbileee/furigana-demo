@@ -64,16 +64,16 @@ The task description in `tasks.json` contains sample test code that targets the 
 - **Pattern**:
   ```typescript
   function textarea(page: Page) {
-    return page.getByLabel('Japanese text input');
+    return page.getByLabel("Japanese text input");
   }
   function submitButton(page: Page) {
-    return page.getByRole('button', { name: /generate furigana/i });
+    return page.getByRole("button", { name: /generate furigana/i });
   }
   function charCounter(page: Page) {
-    return page.locator('[data-state]');
+    return page.locator("[data-state]");
   }
   function errorAlert(page: Page) {
-    return page.getByRole('alert');
+    return page.getByRole("alert");
   }
   ```
 - **Key considerations**:
@@ -101,8 +101,8 @@ Note: `GENERIC_SERVER_ERROR` is currently a module-local constant in `app/routes
   // Verify that the playwright config includes `~/` -> `app/` alias resolution
   // before using this import. If aliases are not configured, use the relative path:
   // import { NON_JAPANESE_INPUT_ERROR } from '../app/constants/furigana.const';
-  import { NON_JAPANESE_INPUT_ERROR } from '~/constants/furigana.const';
-  import { GENERIC_SERVER_ERROR } from '~/constants/error.const';
+  import { NON_JAPANESE_INPUT_ERROR } from "~/constants/furigana.const";
+  import { GENERIC_SERVER_ERROR } from "~/constants/error.const";
   ```
 - **Why exact assertions over partial matching**: `toContainText('Please include at least one kanji character')` would continue to pass even if the full message were edited to remove the clarifying parenthetical or change punctuation. `toHaveText(NON_JAPANESE_INPUT_ERROR)` fails the moment the constant or its value changes, making the test a reliable contract between the UI and the validation logic.
 - **Acceptance criteria**: Both imports resolve at compile time; constant values match the strings rendered in the browser.
@@ -116,8 +116,7 @@ Create `app/constants/error.const.ts` to centralize generic error message consta
   ```typescript
   // Generic server-side error shown when an unexpected failure occurs
   // (e.g. OpenAI API unavailable, unhandled exception in action).
-  export const GENERIC_SERVER_ERROR =
-    'Something went wrong. Please try again.';
+  export const GENERIC_SERVER_ERROR = "Something went wrong. Please try again.";
   ```
 - **Files to modify**:
   - `app/routes/home.tsx` — remove the module-local `GENERIC_SERVER_ERROR` declaration and add `import { GENERIC_SERVER_ERROR } from '~/constants/error.const';` at the top of the file.
@@ -138,19 +137,19 @@ Create `app/constants/error.const.ts` to centralize generic error message consta
 #### Subtask 2.1: Happy path — generates furigana and navigates to reading route
 
 ```typescript
-test('generates furigana for valid Japanese input', async ({ page }) => {
-  await page.goto('/');
-  await textarea(page).fill('日本語を勉強しています');
+test("generates furigana for valid Japanese input", async ({ page }) => {
+  await page.goto("/");
+  await textarea(page).fill("日本語を勉強しています");
   await submitButton(page).click();
 
   // Action redirects to /furigana/<uuid>; wait for navigation
   await page.waitForURL(/\/furigana\/.+/, { timeout: 30_000 });
 
   // ReadingView renders <ruby> elements with <rt> readings
-  const rubyLocator = page.locator('ruby');
+  const rubyLocator = page.locator("ruby");
   await expect(rubyLocator.first()).toBeVisible();
 
-  const rtLocator = page.locator('ruby rt');
+  const rtLocator = page.locator("ruby rt");
   const firstRt = await rtLocator.first().textContent();
   expect(firstRt).toMatch(/[\u3041-\u3096]+/); // hiragana range
 });
@@ -166,13 +165,13 @@ test('generates furigana for valid Japanese input', async ({ page }) => {
 #### Subtask 2.2: Keyboard shortcut — `Meta+Enter` submits the form
 
 ```typescript
-test('Cmd+Enter submits the form', async ({ page }) => {
-  await page.goto('/');
-  await textarea(page).fill('東京に行きました');
-  await textarea(page).press('Meta+Enter');
+test("Cmd+Enter submits the form", async ({ page }) => {
+  await page.goto("/");
+  await textarea(page).fill("東京に行きました");
+  await textarea(page).press("Meta+Enter");
 
   await page.waitForURL(/\/furigana\/.+/, { timeout: 30_000 });
-  await expect(page.locator('ruby').first()).toBeVisible();
+  await expect(page.locator("ruby").first()).toBeVisible();
 });
 ```
 
@@ -184,11 +183,11 @@ test('Cmd+Enter submits the form', async ({ page }) => {
 #### Subtask 2.3: Empty textarea — submit button is disabled on load
 
 ```typescript
-test('disables submit button when textarea is empty', async ({ page }) => {
-  await page.goto('/');
+test("disables submit button when textarea is empty", async ({ page }) => {
+  await page.goto("/");
   await expect(submitButton(page)).toBeDisabled();
 
-  await textarea(page).fill('日本語');
+  await textarea(page).fill("日本語");
   await expect(submitButton(page)).toBeEnabled();
 
   await textarea(page).clear();
@@ -202,13 +201,13 @@ test('disables submit button when textarea is empty', async ({ page }) => {
 #### Subtask 2.4: Character limit — counter turns danger at max length
 
 ```typescript
-test('shows danger counter at 10,000 characters', async ({ page }) => {
-  await page.goto('/');
-  await textarea(page).fill('あ'.repeat(10_000));
+test("shows danger counter at 10,000 characters", async ({ page }) => {
+  await page.goto("/");
+  await textarea(page).fill("あ".repeat(10_000));
 
   const counter = charCounter(page);
-  await expect(counter).toHaveAttribute('data-state', 'danger');
-  await expect(counter).toContainText('10,000 / 10,000');
+  await expect(counter).toHaveAttribute("data-state", "danger");
+  await expect(counter).toContainText("10,000 / 10,000");
 
   // Button is still enabled at exactly the limit (isAtOrOverLimit does not disable)
   await expect(submitButton(page)).toBeEnabled();
@@ -229,11 +228,11 @@ test('shows danger counter at 10,000 characters', async ({ page }) => {
 #### Subtask 3.1: Non-Japanese input — validation error shown, text preserved
 
 ```typescript
-import { NON_JAPANESE_INPUT_ERROR } from '~/constants/furigana.const';
+import { NON_JAPANESE_INPUT_ERROR } from "~/constants/furigana.const";
 
-test('shows validation error for non-Japanese input and preserves text', async ({ page }) => {
-  await page.goto('/');
-  const inputText = 'Hello, this is English only.';
+test("shows validation error for non-Japanese input and preserves text", async ({ page }) => {
+  await page.goto("/");
+  const inputText = "Hello, this is English only.";
   await textarea(page).fill(inputText);
   await submitButton(page).click();
 
@@ -272,28 +271,25 @@ The correct approach is to set up the test environment so the server action thro
 For the MVP scope, implement this test with `test.fixme()` stub documenting the intent, with a note explaining the SSR interception constraint, and implement the simpler mocked-POST variant in a follow-up:
 
 ```typescript
-import { GENERIC_SERVER_ERROR } from '~/constants/error.const';
+import { GENERIC_SERVER_ERROR } from "~/constants/error.const";
 
-test.fixme(
-  'shows generic error when OpenAI API is unavailable',
-  async ({ page }) => {
-    // NOTE: OpenAI calls are server-side (SSR). Playwright route interception
-    // targets browser-level requests only and cannot intercept Node.js outbound
-    // calls. To test this path, run with OPENAI_API_KEY set to an invalid value
-    // in a dedicated playwright project, or mock the furigana.service module
-    // at the process level.
-    //
-    // Expected error message: GENERIC_SERVER_ERROR from ~/constants/error.const
-    // (value: "Something went wrong. Please try again.")
-    //
-    // Implementation plan:
-    // 1. Add a playwright project 'api-failure' in playwright.config.ts that sets
-    //    process.env.OPENAI_API_KEY = 'invalid-key' via a globalSetup fixture.
-    // 2. This test targets that project exclusively.
-    // 3. Submit valid kanji text; expect errorAlert to have text matching
-    //    GENERIC_SERVER_ERROR and textarea to retain original text.
-  },
-);
+test.fixme("shows generic error when OpenAI API is unavailable", async ({ page }) => {
+  // NOTE: OpenAI calls are server-side (SSR). Playwright route interception
+  // targets browser-level requests only and cannot intercept Node.js outbound
+  // calls. To test this path, run with OPENAI_API_KEY set to an invalid value
+  // in a dedicated playwright project, or mock the furigana.service module
+  // at the process level.
+  //
+  // Expected error message: GENERIC_SERVER_ERROR from ~/constants/error.const
+  // (value: "Something went wrong. Please try again.")
+  //
+  // Implementation plan:
+  // 1. Add a playwright project 'api-failure' in playwright.config.ts that sets
+  //    process.env.OPENAI_API_KEY = 'invalid-key' via a globalSetup fixture.
+  // 2. This test targets that project exclusively.
+  // 3. Submit valid kanji text; expect errorAlert to have text matching
+  //    GENERIC_SERVER_ERROR and textarea to retain original text.
+});
 ```
 
 - **Acceptance criteria**: Stub is committed with a clear comment explaining why the test is deferred and what the correct implementation strategy is.
@@ -363,21 +359,21 @@ No changes needed. Confirm the dev server starts correctly and the `OPENAI_API_K
 ### Pattern 1: Inline locator helpers
 
 ```typescript
-import { test, expect } from '@playwright/test';
-import type { Page } from '@playwright/test';
-import { NON_JAPANESE_INPUT_ERROR } from '~/constants/furigana.const';
+import { test, expect } from "@playwright/test";
+import type { Page } from "@playwright/test";
+import { NON_JAPANESE_INPUT_ERROR } from "~/constants/furigana.const";
 
 function textarea(page: Page) {
-  return page.getByLabel('Japanese text input');
+  return page.getByLabel("Japanese text input");
 }
 function submitButton(page: Page) {
-  return page.getByRole('button', { name: /generate furigana/i });
+  return page.getByRole("button", { name: /generate furigana/i });
 }
 function charCounter(page: Page) {
-  return page.locator('[data-state]');
+  return page.locator("[data-state]");
 }
 function errorAlert(page: Page) {
-  return page.getByRole('alert');
+  return page.getByRole("alert");
 }
 ```
 
@@ -398,8 +394,8 @@ await page.waitForURL(/\/furigana\/.+/, { timeout: 30_000 });
 ### Pattern 3: Conditional test skip for API key
 
 ```typescript
-test('generates furigana for valid Japanese input', async ({ page }) => {
-  test.skip(!process.env['OPENAI_API_KEY'], 'Skipped: OPENAI_API_KEY not set in environment');
+test("generates furigana for valid Japanese input", async ({ page }) => {
+  test.skip(!process.env["OPENAI_API_KEY"], "Skipped: OPENAI_API_KEY not set in environment");
   // test body
 });
 ```
@@ -412,8 +408,8 @@ test('generates furigana for valid Japanese input', async ({ page }) => {
 
 ```typescript
 // Import constants so assertions are strict contracts, not substring guesses.
-import { NON_JAPANESE_INPUT_ERROR } from '~/constants/furigana.const';
-import { GENERIC_SERVER_ERROR } from '~/constants/error.const';
+import { NON_JAPANESE_INPUT_ERROR } from "~/constants/furigana.const";
+import { GENERIC_SERVER_ERROR } from "~/constants/error.const";
 
 await expect(errorAlert(page)).toHaveText(NON_JAPANESE_INPUT_ERROR);
 

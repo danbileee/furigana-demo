@@ -4,6 +4,14 @@ description: How to structure task reviews — what to check and in what order
 type: feedback
 ---
 
+When a developer explicitly states that a naming deviation from the task plan is intentional and by design, accept it as an architectural decision and do not flag it as a blocking issue. Treat the developer's confirmation as the authoritative override over the plan document.
+
+**Why:** The task plan is guidance, not a contract. The developer has context about downstream consumers and intentional API surface decisions that may not be reflected in the plan. Flagging accepted deviations wastes review cycles.
+
+**How to apply:** If a naming or structural deviation is raised during review and the developer says "intentional by design", immediately accept it, save the decision to memory, and continue with the remaining review steps without re-raising it.
+
+---
+
 Effective review order for this project:
 
 1. Read the task plan document first (in `.taskmaster/docs/plans/`), then read all changed files in parallel.

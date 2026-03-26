@@ -2,18 +2,6 @@
   "MVP-milestone-2": {
     "tasks": [
       {
-        "id": "2",
-        "title": "Generic Pagination and Domain Schemas",
-        "description": "Create reusable pagination schemas and extend furigana domain schemas with database row types using drizzle-orm/zod",
-        "details": "Create app/schema/pagination.schema.ts with CursorSchema (validates { createdAt: ISO datetime, id: UUID }), generic PaginationResultsSchema factory function accepting any Zod schema and returning pagination envelope ({ data: T[], nextCursor: string | null, hasMore: boolean }), CursorPaginationParams and PaginationResults<T> TypeScript utility types. Extend app/schema/furigana.schema.ts using createSelectSchema and createInsertSchema from drizzle-orm/zod to generate base schemas from the Drizzle table, then refine with domain validations. Add FuriganaRowSchema (full SELECT * shape with UUID and datetime refinements), FuriganaInsertSchema (rawText max 5000 chars, rawTextSnippet max 30 chars), FuriganaSidebarSchema (manual projection with id, rawTextSnippet, title nullable, createdAt), and FuriganaPaginationResultsSchema composed via PaginationResultsSchema(FuriganaSidebarSchema). Export TypeScript types for each schema.",
-        "testStrategy": "Unit tests for CursorSchema validate correct cursor shapes and reject malformed data (missing fields, invalid types). Test PaginationResultsSchema factory with simple test schemas validates envelope structure (data array, nextCursor, hasMore) and rejects invalid shapes. Verify no total field is accepted. Test FuriganaInsertSchema rejects rawText over 5000 chars and rawTextSnippet over 30 chars. Test FuriganaRowSchema accepts valid database rows. Test FuriganaSidebarSchema validates sidebar projections. Test FuriganaPaginationResultsSchema composed schema validates paginated sidebar responses correctly.",
-        "priority": "high",
-        "dependencies": ["1"],
-        "status": "in-progress",
-        "subtasks": [],
-        "updatedAt": "2026-03-26T09:42:14.918Z"
-      },
-      {
         "id": "3",
         "title": "Database Query Functions with Cursor Pagination",
         "description": "Implement typed Drizzle query functions for insert, single fetch, and cursor-paginated list retrieval using row-value comparison",
@@ -22,7 +10,10 @@
         "priority": "high",
         "dependencies": ["1", "2"],
         "status": "pending",
-        "subtasks": []
+        "subtasks": [],
+        "complexity": 8,
+        "recommendedSubtasks": 5,
+        "expansionPrompt": "Break down query implementation into: (1) Create app/lib/db/queries.ts with insertFurigana() function that computes rawTextSnippet as rawText.slice(0, 30) and validates input via FuriganaInsertSchema before INSERT; (2) Implement getFuriganaById(id) with WHERE id = :id AND deleted_at IS NULL clause returning FuriganaRow | null; (3) Implement listFuriganas() first-page query (no cursor) with ORDER BY created_at DESC, id DESC LIMIT :limit + 1; (4) Implement listFuriganas() cursor-based query using row-value comparison WHERE (created_at, id) < (:cursorCreatedAt, :cursorId) AND deleted_at IS NULL with proper base64 cursor encoding/decoding and CursorSchema validation; (5) Write comprehensive unit tests with in-memory SQLite (':memory:') covering pagination edge cases (first page, subsequent pages, last page detection via +1 fetch), cursor stability across concurrent inserts, soft-delete filtering, and nextCursor/hasMore correctness"
       },
       {
         "id": "4",
@@ -33,7 +24,10 @@
         "priority": "medium",
         "dependencies": [],
         "status": "pending",
-        "subtasks": []
+        "subtasks": [],
+        "complexity": 5,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Break down into: (1) Create app/lib/sanitize.ts with sanitizeRawText() that strips HTML tags (/(<([^>]+)>)/gi), removes C0/C1 control characters (U+0000-U+001F except tab/newline/CR, U+007F, U+0080-U+009F) and BiDi overrides (U+200E, U+200F, U+202A-U+202E, U+2066-U+2069), normalizes whitespace (collapse consecutive spaces, preserve paragraph breaks), and trims; (2) Create app/lib/rate-limit.ts with in-memory Map<string, { count: number; resetAt: number }> rate limiter (10 req/60s per IP), extracting IP from x-forwarded-for header with fallback to 'unknown', and 60-second cleanup interval; (3) Write comprehensive unit tests for sanitization (HTML stripping, control character removal, BiDi override removal, whitespace normalization, Japanese text preservation) and rate limiter (under-limit allowance, over-limit blocking, time window reset, independent IP tracking)"
       },
       {
         "id": "5",
@@ -44,7 +38,10 @@
         "priority": "high",
         "dependencies": [],
         "status": "pending",
-        "subtasks": []
+        "subtasks": [],
+        "complexity": 3,
+        "recommendedSubtasks": 2,
+        "expansionPrompt": "Break down into: (1) Update app/services/furigana.service.ts generateFurigana() return type from Promise<FuriganaToken[]> to Promise<{ annotationString: string; tokens: FuriganaToken[] }>, extracting annotationString from completion response and calling parseAnnotationString() to get tokens, then returning both values; (2) Update the single call site in app/routes/home.tsx action to destructure { annotationString, tokens } instead of just tokens, preparing for database storage (no DB write yet—that happens in Task 6)"
       },
       {
         "id": "6",
@@ -55,7 +52,10 @@
         "priority": "high",
         "dependencies": ["3", "4", "5"],
         "status": "pending",
-        "subtasks": []
+        "subtasks": [],
+        "complexity": 8,
+        "recommendedSubtasks": 6,
+        "expansionPrompt": "Break down into: (1) Add rate limiting to home.tsx action (extract IP, call rate limiter, return 429 on exceeded); (2) Replace existing sanitizeUserInput() call with new sanitizeRawText() from Task 4; (3) Add server-side Zod validation for 5000 char max (beyond existing client-side validation); (4) Update generateFurigana() call to destructure { annotationString, tokens } per Task 5; (5) Add annotation string validation by running parseAnnotationString(annotationString) and catching parse errors, returning error with preserved text on failure (prevents DB write of malformed data); (6) Replace setTokens() in-memory storage with insertFurigana() Turso write ({ id: crypto.randomUUID(), rawText: sanitized, rawTextSnippet: computed, annotationString, createdAt: ISO string }) and redirect to /furigana/:id, with error handling for DB write failures preserving textarea content"
       },
       {
         "id": "7",
@@ -66,7 +66,10 @@
         "priority": "high",
         "dependencies": ["3"],
         "status": "pending",
-        "subtasks": []
+        "subtasks": [],
+        "complexity": 4,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Break down into: (1) Update app/routes/furigana.$id.tsx loader to call getFuriganaById(params.id) instead of consumeTokens(), handling null return (not found or soft-deleted) by throwing 404 response; (2) Parse entry.annotationString via parseAnnotationString() to get tokens array when entry exists; (3) Remove token-storage.service import and update loader return type, ensuring error boundary properly handles 404 responses with user-friendly messaging"
       },
       {
         "id": "8",
@@ -77,7 +80,10 @@
         "priority": "medium",
         "dependencies": ["3"],
         "status": "pending",
-        "subtasks": []
+        "subtasks": [],
+        "complexity": 5,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Break down into: (1) Create app/routes/api/furiganas.ts resource route for GET /api/furiganas with query param validation (cursor optional base64 string, limit default 20 max 50) using Zod, call listFuriganas({ cursor, limit }), return JSON matching FuriganaPaginationResultsSchema with proper error handling (400 for invalid cursor/limit); (2) Create app/routes/api/furiganas.$id.ts for GET /api/furiganas/:id calling getFuriganaById(params.id), return full entry if found/non-deleted, throw 404 if null; (3) Add both API routes to app/routes.ts config and verify server-only bundling (no client-side inclusion)"
       },
       {
         "id": "9",
@@ -88,7 +94,10 @@
         "priority": "medium",
         "dependencies": ["2", "8"],
         "status": "pending",
-        "subtasks": []
+        "subtasks": [],
+        "complexity": 6,
+        "recommendedSubtasks": 4,
+        "expansionPrompt": "Break down into: (1) Install @tanstack/react-query and verify compatibility with React 19; (2) Update app/lib/axios/instance.ts to remove any future auth header/interceptor code and add TODO comment for future auth (currently no auth in codebase); (3) Create app/lib/api/furiganas.ts with fetchFuriganaList(cursor?: string, limit = 20) calling GET /api/furiganas with params and validating response via FuriganaPaginationResultsSchema.parse(), and fetchFuriganaById(id) calling GET /api/furiganas/:id validating via FuriganaRowSchema.parse(); (4) Create QueryClient singleton with defaultOptions { queries: { retry: 1 } } (staleTime set per-query) exported from app/lib/api/client.ts or similar location, ready for QueryClientProvider in Task 10"
       },
       {
         "id": "10",
@@ -99,7 +108,10 @@
         "priority": "high",
         "dependencies": ["9"],
         "status": "pending",
-        "subtasks": []
+        "subtasks": [],
+        "complexity": 7,
+        "recommendedSubtasks": 5,
+        "expansionPrompt": "Break down into: (1) Run pnpx shadcn@latest add sidebar --defaults and verify installation of Sidebar primitives (Sheet, Separator, Tooltip, Input, Skeleton) in app/components/ui/; (2) Create app/components/ClientOnly.tsx wrapper that renders null on server (SSR) and children after useEffect (client-only hydration); (3) Create app/components/sidebar/SidebarSkeleton.tsx matching --sidebar-width CSS variable and app/components/sidebar/SidebarErrorBoundary.tsx React ErrorBoundary with fallback UI; (4) Create app/routes/layout.tsx wrapping QueryClientProvider (from Task 9), SidebarProvider (defaultOpen=true), SidebarErrorBoundary, ClientOnly (fallback SidebarSkeleton), AppSidebar placeholder (receives activeEntryId from useParams), and SidebarInset with <Outlet />; (5) Update app/routes.ts to wrap index and furigana/:id routes in layout route and add API resource routes from Task 8"
       },
       {
         "id": "11",
@@ -110,7 +122,10 @@
         "priority": "high",
         "dependencies": ["10"],
         "status": "pending",
-        "subtasks": []
+        "subtasks": [],
+        "complexity": 9,
+        "recommendedSubtasks": 6,
+        "expansionPrompt": "Break down into: (1) Create app/components/sidebar/AppSidebar.tsx structure using shadcn/ui primitives (Sidebar, SidebarHeader with 'New' button to /, SidebarContent scrollable, SidebarFooter empty, SidebarGroup/GroupContent, SidebarMenu/MenuItem/MenuButton with asChild Link and isActive); (2) Implement useInfiniteQuery with queryKey ['furiganas', 'list'], queryFn calling fetchFuriganaList, initialPageParam undefined, getNextPageParam extracting nextCursor, staleTime: Infinity, refetchOnWindowFocus: false; (3) Flatten pages.flatMap() to entries array and render entry rows with SidebarMenuButton (rawTextSnippet truncate, formatted date 'Mar 21', isActive highlighting for current entry); (4) Implement loading state with SidebarMenuSkeleton (5 items, showIcon=false) and empty state ('No entries yet'); (5) Add 'Load more' button when hasNextPage, calling fetchNextPage(), disabled during isFetchingNextPage; (6) Implement scroll position preservation using scrollTopRef + scrollContainerRef on SidebarContent (restore after data updates) and cache invalidation via useLocation + useEffect to invalidate ['furiganas', 'list'] on route change to /furigana/:id"
       },
       {
         "id": "12",
@@ -121,16 +136,16 @@
         "priority": "medium",
         "dependencies": ["6", "7", "11"],
         "status": "pending",
-        "subtasks": []
+        "subtasks": [],
+        "complexity": 6,
+        "recommendedSubtasks": 5,
+        "expansionPrompt": "Break down into: (1) Delete app/services/token-storage.service.ts and its test file, verify no remaining imports via grep/search; (2) Remove <main> wrappers from home.tsx and furigana.$id.tsx (layout provides SidebarInset structure); (3) Run drizzle-kit generate to create initial migration, then drizzle-kit migrate to apply to local dev database (file:local.db), document turso db dump backup step in README for cloud migrations; (4) Add bundle audit script to package.json or CI config that greps build/client/assets/*.js output for '@libsql/client' and fails build if found (prevents server-only code in client bundle); (5) Update .env.example with TURSO_DATABASE_URL and TURSO_AUTH_TOKEN, run pnpm type-check (zero errors), pnpm test (all pass), pnpm test:e2e (submission flow, sidebar navigation, reload persistence, cursor pagination)"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "created": "2026-03-25T06:36:19.604Z",
-      "updated": "2026-03-25T06:36:19.604Z",
-      "description": "Tasks for MVP-milestone-2 context",
-      "lastModified": "2026-03-26T09:42:14.921Z",
-      "taskCount": 11,
+      "lastModified": "2026-03-26T12:59:08.107Z",
+      "taskCount": 10,
       "completedCount": 0,
       "tags": ["MVP-milestone-2"]
     }
