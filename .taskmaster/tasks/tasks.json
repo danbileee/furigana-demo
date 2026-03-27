@@ -9,11 +9,12 @@
         "testStrategy": "Unit tests with in-memory SQLite (':memory:'). Test insertFurigana correctly writes entry and computes rawTextSnippet from rawText.slice(0, 30). Test getFuriganaById returns entry when exists and not soft-deleted, returns null for non-existent ID or soft-deleted entry. Test listFuriganas first page returns correct entries ordered by created_at DESC, id DESC. Test listFuriganas with valid cursor returns next page. Test listFuriganas returns nextCursor when more entries exist and null when on last page. Test hasMore is true/false correctly. Verify no total field in response. Test cursor stability: new inserts don't affect cursor-based traversal of older entries.",
         "priority": "high",
         "dependencies": ["1", "2"],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [],
         "complexity": 8,
         "recommendedSubtasks": 5,
-        "expansionPrompt": "Break down query implementation into: (1) Create app/lib/db/queries.ts with insertFurigana() function that computes rawTextSnippet as rawText.slice(0, 30) and validates input via FuriganaInsertSchema before INSERT; (2) Implement getFuriganaById(id) with WHERE id = :id AND deleted_at IS NULL clause returning FuriganaRow | null; (3) Implement listFuriganas() first-page query (no cursor) with ORDER BY created_at DESC, id DESC LIMIT :limit + 1; (4) Implement listFuriganas() cursor-based query using row-value comparison WHERE (created_at, id) < (:cursorCreatedAt, :cursorId) AND deleted_at IS NULL with proper base64 cursor encoding/decoding and CursorSchema validation; (5) Write comprehensive unit tests with in-memory SQLite (':memory:') covering pagination edge cases (first page, subsequent pages, last page detection via +1 fetch), cursor stability across concurrent inserts, soft-delete filtering, and nextCursor/hasMore correctness"
+        "expansionPrompt": "Break down query implementation into: (1) Create app/lib/db/queries.ts with insertFurigana() function that computes rawTextSnippet as rawText.slice(0, 30) and validates input via FuriganaInsertSchema before INSERT; (2) Implement getFuriganaById(id) with WHERE id = :id AND deleted_at IS NULL clause returning FuriganaRow | null; (3) Implement listFuriganas() first-page query (no cursor) with ORDER BY created_at DESC, id DESC LIMIT :limit + 1; (4) Implement listFuriganas() cursor-based query using row-value comparison WHERE (created_at, id) < (:cursorCreatedAt, :cursorId) AND deleted_at IS NULL with proper base64 cursor encoding/decoding and CursorSchema validation; (5) Write comprehensive unit tests with in-memory SQLite (':memory:') covering pagination edge cases (first page, subsequent pages, last page detection via +1 fetch), cursor stability across concurrent inserts, soft-delete filtering, and nextCursor/hasMore correctness",
+        "updatedAt": "2026-03-27T07:02:22.980Z"
       },
       {
         "id": "4",
@@ -144,7 +145,7 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-03-26T12:59:08.107Z",
+      "lastModified": "2026-03-27T07:02:22.981Z",
       "taskCount": 10,
       "completedCount": 0,
       "tags": ["MVP-milestone-2"]
