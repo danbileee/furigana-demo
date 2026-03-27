@@ -14,7 +14,7 @@ import {
   type TextToken,
 } from "./furigana.schema";
 import type { FuriganaRow, FuriganaInsert } from "~/lib/db/furigana.db";
-import { MAX_INPUT_LENGTH } from "~/constants/input.const";
+import { MAX_FURIGANA_INPUT_LENGTH } from "~/constants/furigana.const";
 
 describe("TextTokenSchema", () => {
   it("parses a valid text token", () => {
@@ -263,7 +263,7 @@ describe("FuriganaInsertSchema", () => {
   it("rejects rawText longer than MAX_INPUT_LENGTH", () => {
     const result = FuriganaInsertSchema.safeParse({
       ...baseInsert,
-      rawText: "a".repeat(MAX_INPUT_LENGTH + 1),
+      rawText: "a".repeat(MAX_FURIGANA_INPUT_LENGTH + 1),
     });
 
     expect(result.success).toBe(false);
@@ -272,10 +272,10 @@ describe("FuriganaInsertSchema", () => {
   it("accepts rawText exactly MAX_INPUT_LENGTH characters", () => {
     const result = FuriganaInsertSchema.parse({
       ...baseInsert,
-      rawText: "a".repeat(MAX_INPUT_LENGTH),
+      rawText: "a".repeat(MAX_FURIGANA_INPUT_LENGTH),
     });
 
-    expect(result.rawText.length).toBe(MAX_INPUT_LENGTH);
+    expect(result.rawText.length).toBe(MAX_FURIGANA_INPUT_LENGTH);
   });
 
   it("rejects empty rawText", () => {
@@ -356,6 +356,15 @@ describe("FuriganaPaginationItemSchema", () => {
       id: "550e8400-e29b-41d4-a716-446655440000",
       title: null,
       createdAt: "2026-03-26T12:00:00.000Z",
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects rawTextSnippet longer than 30 characters", () => {
+    const result = FuriganaPaginationItemSchema.safeParse({
+      ...sidebarItem,
+      rawTextSnippet: "a".repeat(31),
     });
 
     expect(result.success).toBe(false);

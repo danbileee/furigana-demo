@@ -1,7 +1,7 @@
 import * as z from "zod";
 import { CursorPaginationResultsSchema } from "~/schema/pagination.schema";
 import { BaseEntitySchema } from "./base.schema";
-import { MAX_INPUT_LENGTH } from "~/constants/input.const";
+import { MAX_FURIGANA_INPUT_LENGTH } from "~/constants/furigana.const";
 
 /**
  * @schema
@@ -56,7 +56,7 @@ export type FuriganaInferredRow = z.infer<typeof FuriganaRowSchema>;
 
 export const FuriganaInsertSchema = z.object({
   ...BaseEntitySchema.shape,
-  rawText: z.string().min(1).max(MAX_INPUT_LENGTH),
+  rawText: z.string().min(1).max(MAX_FURIGANA_INPUT_LENGTH),
   rawTextSnippet: z.string().min(1).max(30),
   annotationString: z.string(), // unbounded by design — annotation strings can exceed rawText length due to reading annotations
   title: z.string().nullable().optional(),
@@ -66,7 +66,7 @@ export type FuriganaInferredInsert = z.infer<typeof FuriganaInsertSchema>;
 
 export const FuriganaPaginationItemSchema = z.object({
   id: z.uuid(),
-  rawTextSnippet: z.string(),
+  rawTextSnippet: z.string().max(30),
   title: z.string().nullable(),
   createdAt: z.iso.datetime(),
 });

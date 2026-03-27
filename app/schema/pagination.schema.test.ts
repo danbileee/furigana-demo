@@ -105,6 +105,24 @@ describe("CursorPaginationParamsSchema", () => {
     expect(result.success).toBe(false);
   });
 
+  it("rejects non-integer limit", () => {
+    const result = CursorPaginationParamsSchema.safeParse({ limit: 1.5 });
+
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects limit below 1", () => {
+    const result = CursorPaginationParamsSchema.safeParse({ limit: 0 });
+
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects limit above 100", () => {
+    const result = CursorPaginationParamsSchema.safeParse({ limit: 101 });
+
+    expect(result.success).toBe(false);
+  });
+
   it("strips unknown fields", () => {
     const result = CursorPaginationParamsSchema.parse({
       cursor: "abc123",
