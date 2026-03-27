@@ -19,7 +19,7 @@ export default mergeConfig(
       coverage: {
         provider: "v8",
         reporter: ["text", "json", "html"],
-        include: ["app/schema/**/*.ts"],
+        include: ["app/schema/**/*.ts", "app/lib/db/**/*.ts"],
         exclude: ["**/*.test.ts", "**/*.d.ts"],
       },
     },
