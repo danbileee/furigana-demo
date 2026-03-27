@@ -5,7 +5,7 @@ import type { Route } from "./+types/home";
 import { Button } from "~/components/ui/button";
 import { Textarea } from "~/components/ui/textarea";
 import { GENERIC_SERVER_ERROR } from "~/constants/error.const";
-import { MAX_INPUT_LENGTH } from "~/constants/input.const";
+import { MAX_FURIGANA_INPUT_LENGTH } from "~/constants/furigana.const";
 import { cn } from "~/lib/utils";
 import { generateFurigana } from "~/services/furigana.service";
 import { setTokens } from "~/services/token-storage.service";
@@ -63,8 +63,8 @@ export default function Home() {
   const [text, setText] = useState<string>(actionOriginalText);
 
   const charCount = text.length;
-  const isAtOrOverLimit = charCount >= MAX_INPUT_LENGTH;
-  const isOverLimit = charCount > MAX_INPUT_LENGTH;
+  const isAtOrOverLimit = charCount >= MAX_FURIGANA_INPUT_LENGTH;
+  const isOverLimit = charCount > MAX_FURIGANA_INPUT_LENGTH;
   const isSubmitDisabled = charCount === 0 || isOverLimit || isSubmitting;
 
   useEffect(() => {
@@ -94,7 +94,7 @@ export default function Home() {
             }
           }}
           disabled={isSubmitting}
-          maxLength={MAX_INPUT_LENGTH}
+          maxLength={MAX_FURIGANA_INPUT_LENGTH}
           className="min-h-48 resize-y"
         />
 
@@ -105,7 +105,7 @@ export default function Home() {
             isAtOrOverLimit ? "text-destructive" : "text-muted-foreground",
           )}
         >
-          {charCount.toLocaleString()} / {MAX_INPUT_LENGTH.toLocaleString()}
+          {charCount.toLocaleString()} / {MAX_FURIGANA_INPUT_LENGTH.toLocaleString()}
         </p>
 
         {errorMessage !== undefined && (

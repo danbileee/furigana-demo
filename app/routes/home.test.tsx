@@ -2,8 +2,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { MAX_INPUT_LENGTH } from "../constants/input.const";
-import { NON_JAPANESE_INPUT_ERROR } from "../constants/furigana.const";
+import { NON_JAPANESE_INPUT_ERROR, MAX_FURIGANA_INPUT_LENGTH } from "../constants/furigana.const";
 
 type ActionData = {
   error: string;
@@ -61,15 +60,15 @@ describe("home route component", () => {
     render(<Home />);
     fireEvent.change(getTextarea(), { target: { value: "こんにちは" } });
 
-    screen.getByText(`5 / ${MAX_INPUT_LENGTH.toLocaleString()}`);
+    screen.getByText(`5 / ${MAX_FURIGANA_INPUT_LENGTH.toLocaleString()}`);
   });
 
   it("marks counter as danger at the max length", () => {
     render(<Home />);
-    fireEvent.change(getTextarea(), { target: { value: "あ".repeat(MAX_INPUT_LENGTH) } });
+    fireEvent.change(getTextarea(), { target: { value: "あ".repeat(MAX_FURIGANA_INPUT_LENGTH) } });
 
     const counter = screen.getByText(
-      `${MAX_INPUT_LENGTH.toLocaleString()} / ${MAX_INPUT_LENGTH.toLocaleString()}`,
+      `${MAX_FURIGANA_INPUT_LENGTH.toLocaleString()} / ${MAX_FURIGANA_INPUT_LENGTH.toLocaleString()}`,
     );
     expect(counter.getAttribute("data-state")).toBe("danger");
   });
@@ -82,7 +81,7 @@ describe("home route component", () => {
   it("disables submit button when action data contains over-limit text", () => {
     mockUseActionData.mockReturnValue({
       error: "Text exceeds limit.",
-      originalText: "あ".repeat(MAX_INPUT_LENGTH + 1),
+      originalText: "あ".repeat(MAX_FURIGANA_INPUT_LENGTH + 1),
     });
     render(<Home />);
 

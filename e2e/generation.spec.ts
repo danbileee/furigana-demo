@@ -1,8 +1,7 @@
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
 import { GENERIC_SERVER_ERROR } from "~/constants/error.const";
-import { NON_JAPANESE_INPUT_ERROR } from "~/constants/furigana.const";
-import { MAX_INPUT_LENGTH } from "~/constants/input.const";
+import { NON_JAPANESE_INPUT_ERROR, MAX_FURIGANA_INPUT_LENGTH } from "~/constants/furigana.const";
 
 function textarea(page: Page) {
   return page.getByLabel("Japanese text input");
@@ -73,15 +72,15 @@ test.describe("Furigana generation flow", () => {
     await expect(submitButton(page)).toBeDisabled();
   });
 
-  test(`shows danger counter at ${MAX_INPUT_LENGTH.toLocaleString()} characters`, async ({
+  test(`shows danger counter at ${MAX_FURIGANA_INPUT_LENGTH.toLocaleString()} characters`, async ({
     page,
   }) => {
     await page.goto("/");
-    await typeTextareaValue(page, "a".repeat(MAX_INPUT_LENGTH));
+    await typeTextareaValue(page, "a".repeat(MAX_FURIGANA_INPUT_LENGTH));
 
     await expect(charCounter(page)).toHaveAttribute("data-state", "danger");
     await expect(charCounter(page)).toContainText(
-      `${MAX_INPUT_LENGTH.toLocaleString()} / ${MAX_INPUT_LENGTH.toLocaleString()}`,
+      `${MAX_FURIGANA_INPUT_LENGTH.toLocaleString()} / ${MAX_FURIGANA_INPUT_LENGTH.toLocaleString()}`,
     );
     await expect(submitButton(page)).toBeEnabled();
   });
