@@ -5,7 +5,7 @@ export const CursorSchema = BaseEntitySchema.pick({ id: true, createdAt: true })
 
 export type Cursor = z.infer<typeof CursorSchema>;
 
-export function PaginationResultsSchema<S extends z.ZodTypeAny>(itemSchema: S) {
+export function CursorPaginationResultsSchema<S extends z.ZodTypeAny>(itemSchema: S) {
   return z.object({
     data: z.array(itemSchema),
     nextCursor: z.string().nullable(),
@@ -13,13 +13,17 @@ export function PaginationResultsSchema<S extends z.ZodTypeAny>(itemSchema: S) {
   });
 }
 
-export type PaginationParams = {
-  cursor?: string;
-  limit?: number;
-};
+export const CursorPaginationParamsSchema = z.object({
+  cursor: z.string().optional(),
+  limit: z.number().optional(),
+});
 
-type PaginationResultsBase = z.infer<ReturnType<typeof PaginationResultsSchema<z.ZodTypeAny>>>;
+export type CursorPaginationParams = z.infer<typeof CursorPaginationParamsSchema>;
 
-export type PaginationResults<T> = Omit<PaginationResultsBase, "data"> & {
+type CursorPaginationResultsBase = z.infer<
+  ReturnType<typeof CursorPaginationResultsSchema<z.ZodTypeAny>>
+>;
+
+export type CursorPaginationResults<T> = Omit<CursorPaginationResultsBase, "data"> & {
   data: T[];
 };

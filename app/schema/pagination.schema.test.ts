@@ -1,6 +1,10 @@
 import * as z from "zod";
 
-import { CursorSchema, PaginationResultsSchema } from "./pagination.schema";
+import {
+  CursorPaginationParamsSchema,
+  CursorSchema,
+  CursorPaginationResultsSchema,
+} from "./pagination.schema";
 
 describe("CursorSchema", () => {
   it("accepts a valid cursor with ISO datetime and UUID", () => {
@@ -58,9 +62,63 @@ describe("CursorSchema", () => {
   });
 });
 
+describe("CursorPaginationParamsSchema", () => {
+  it("accepts an empty object", () => {
+    const result = CursorPaginationParamsSchema.parse({});
+
+    expect(result).toEqual({});
+  });
+
+  it("accepts cursor only", () => {
+    const input = { cursor: "abc123" };
+
+    const result = CursorPaginationParamsSchema.parse(input);
+
+    expect(result).toEqual(input);
+  });
+
+  it("accepts limit only", () => {
+    const input = { limit: 20 };
+
+    const result = CursorPaginationParamsSchema.parse(input);
+
+    expect(result).toEqual(input);
+  });
+
+  it("accepts cursor and limit", () => {
+    const input = { cursor: "abc123", limit: 20 };
+
+    const result = CursorPaginationParamsSchema.parse(input);
+
+    expect(result).toEqual(input);
+  });
+
+  it("rejects non-string cursor", () => {
+    const result = CursorPaginationParamsSchema.safeParse({ cursor: 123 });
+
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects non-number limit", () => {
+    const result = CursorPaginationParamsSchema.safeParse({ limit: "20" });
+
+    expect(result.success).toBe(false);
+  });
+
+  it("strips unknown fields", () => {
+    const result = CursorPaginationParamsSchema.parse({
+      cursor: "abc123",
+      limit: 20,
+      extra: true,
+    });
+
+    expect("extra" in result).toBe(false);
+  });
+});
+
 describe("PaginationResultsSchema", () => {
   const itemSchema = z.object({ name: z.string() });
-  const schema = PaginationResultsSchema(itemSchema);
+  const schema = CursorPaginationResultsSchema(itemSchema);
 
   it("returns a schema that accepts a valid envelope", () => {
     const input = {

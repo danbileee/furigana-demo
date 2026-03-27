@@ -1,19 +1,20 @@
 import {
-  FuriganaEntityInsertSchema,
+  FuriganaInsertSchema,
   FuriganaPaginationResultsSchema,
-  FuriganaEntityRowSchema,
-  FuriganaPaginationResultSchema,
+  FuriganaRowSchema,
+  FuriganaPaginationItemSchema,
   FuriganaTokenSchema,
   RubyTokenSchema,
   TextTokenSchema,
   isRubyToken,
   isTextToken,
-  type FuriganaEntityInsert,
-  type FuriganaEntityRow,
+  type FuriganaInferredInsert,
+  type FuriganaInferredRow,
   type FuriganaToken,
   type TextToken,
 } from "./furigana.schema";
 import type { FuriganaRow, FuriganaInsert } from "~/lib/db/furigana.db";
+import { MAX_INPUT_LENGTH } from "~/constants/input.const";
 
 describe("TextTokenSchema", () => {
   it("parses a valid text token", () => {
@@ -155,24 +156,22 @@ describe("readonly discriminant", () => {
 
 describe("Drizzle type alignment", () => {
   it("keeps Furigana row type bidirectionally assignable", () => {
-    const _drizzleToZod = {} as FuriganaRow satisfies FuriganaEntityRow;
-    const _zodToDrizzle = {} as FuriganaEntityRow satisfies FuriganaRow;
+    const _drizzleToZod = {} as FuriganaRow satisfies FuriganaInferredRow;
+    const _zodToDrizzle = {} as FuriganaInferredRow satisfies FuriganaRow;
 
     expect(_drizzleToZod).toBeDefined();
     expect(_zodToDrizzle).toBeDefined();
   });
 
-  it("keeps Furigana insert type bidirectionally assignable", () => {
-    const _drizzleInsertToZod = {} as FuriganaInsert satisfies FuriganaEntityInsert;
-    const _zodInsertToDrizzle = {} as FuriganaEntityInsert satisfies FuriganaInsert;
+  it("keeps Furigana entity insert assignable to Drizzle insert type", () => {
+    const _zodInsertToDrizzle = {} as FuriganaInferredInsert satisfies FuriganaInsert;
 
-    expect(_drizzleInsertToZod).toBeDefined();
     expect(_zodInsertToDrizzle).toBeDefined();
   });
 });
 
 describe("FuriganaRowSchema", () => {
-  const validRow: FuriganaEntityRow = {
+  const validRow: FuriganaInferredRow = {
     id: "550e8400-e29b-41d4-a716-446655440000",
     rawText: "東京は素晴らしい",
     rawTextSnippet: "東京は素晴らしい",
@@ -184,13 +183,13 @@ describe("FuriganaRowSchema", () => {
   };
 
   it("accepts a valid full database row", () => {
-    const result = FuriganaEntityRowSchema.parse(validRow);
+    const result = FuriganaRowSchema.parse(validRow);
 
     expect(result).toEqual(validRow);
   });
 
   it("accepts nullable title and deletedAt", () => {
-    const result = FuriganaEntityRowSchema.parse({
+    const result = FuriganaRowSchema.parse({
       ...validRow,
       title: null,
     });
@@ -200,7 +199,7 @@ describe("FuriganaRowSchema", () => {
   });
 
   it("accepts non-null deletedAt", () => {
-    const result = FuriganaEntityRowSchema.parse({
+    const result = FuriganaRowSchema.parse({
       ...validRow,
       deletedAt: "2026-03-27T00:00:00.000Z",
     });
@@ -209,7 +208,7 @@ describe("FuriganaRowSchema", () => {
   });
 
   it("rejects non-UUID id", () => {
-    const result = FuriganaEntityRowSchema.safeParse({
+    const result = FuriganaRowSchema.safeParse({
       ...validRow,
       id: "not-a-uuid",
     });
@@ -218,7 +217,7 @@ describe("FuriganaRowSchema", () => {
   });
 
   it("rejects non-ISO createdAt", () => {
-    const result = FuriganaEntityRowSchema.safeParse({
+    const result = FuriganaRowSchema.safeParse({
       ...validRow,
       createdAt: "2026/03/26",
     });
@@ -227,7 +226,7 @@ describe("FuriganaRowSchema", () => {
   });
 
   it("rejects non-ISO updatedAt", () => {
-    const result = FuriganaEntityRowSchema.safeParse({
+    const result = FuriganaRowSchema.safeParse({
       ...validRow,
       updatedAt: "2026/03/26",
     });
@@ -243,16 +242,17 @@ describe("FuriganaInsertSchema", () => {
     rawTextSnippet: "東京",
     annotationString: "東京{とうきょう}",
     createdAt: "2026-03-26T12:00:00.000Z",
+    updatedAt: "2026-03-26T12:00:00.000Z",
   };
 
   it("accepts a minimal valid insert without title", () => {
-    const result = FuriganaEntityInsertSchema.parse(baseInsert);
+    const result = FuriganaInsertSchema.parse(baseInsert);
 
     expect(result.title).toBeUndefined();
   });
 
   it("accepts an insert with title null", () => {
-    const result = FuriganaEntityInsertSchema.parse({
+    const result = FuriganaInsertSchema.parse({
       ...baseInsert,
       title: null,
     });
@@ -260,26 +260,35 @@ describe("FuriganaInsertSchema", () => {
     expect(result.title).toBeNull();
   });
 
-  it("rejects rawText longer than 5000", () => {
-    const result = FuriganaEntityInsertSchema.safeParse({
+  it("rejects rawText longer than MAX_INPUT_LENGTH", () => {
+    const result = FuriganaInsertSchema.safeParse({
       ...baseInsert,
-      rawText: "a".repeat(5001),
+      rawText: "a".repeat(MAX_INPUT_LENGTH + 1),
     });
 
     expect(result.success).toBe(false);
   });
 
-  it("accepts rawText exactly 5000 characters", () => {
-    const result = FuriganaEntityInsertSchema.parse({
+  it("accepts rawText exactly MAX_INPUT_LENGTH characters", () => {
+    const result = FuriganaInsertSchema.parse({
       ...baseInsert,
-      rawText: "a".repeat(5000),
+      rawText: "a".repeat(MAX_INPUT_LENGTH),
     });
 
-    expect(result.rawText.length).toBe(5000);
+    expect(result.rawText.length).toBe(MAX_INPUT_LENGTH);
+  });
+
+  it("rejects empty rawText", () => {
+    const result = FuriganaInsertSchema.safeParse({
+      ...baseInsert,
+      rawText: "",
+    });
+
+    expect(result.success).toBe(false);
   });
 
   it("rejects rawTextSnippet longer than 30", () => {
-    const result = FuriganaEntityInsertSchema.safeParse({
+    const result = FuriganaInsertSchema.safeParse({
       ...baseInsert,
       rawTextSnippet: "a".repeat(31),
     });
@@ -288,16 +297,38 @@ describe("FuriganaInsertSchema", () => {
   });
 
   it("accepts rawTextSnippet exactly 30 characters", () => {
-    const result = FuriganaEntityInsertSchema.parse({
+    const result = FuriganaInsertSchema.parse({
       ...baseInsert,
       rawTextSnippet: "a".repeat(30),
     });
 
     expect(result.rawTextSnippet.length).toBe(30);
   });
+
+  it("rejects empty rawTextSnippet", () => {
+    const result = FuriganaInsertSchema.safeParse({
+      ...baseInsert,
+      rawTextSnippet: "",
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects non-ISO updatedAt when provided", () => {
+    const result = FuriganaInsertSchema.safeParse({
+      ...baseInsert,
+      updatedAt: "2026/03/26",
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it("excludes deletedAt from insert schema shape", () => {
+    expect("deletedAt" in FuriganaInsertSchema.shape).toBe(false);
+  });
 });
 
-describe("FuriganaSidebarSchema", () => {
+describe("FuriganaPaginationItemSchema", () => {
   const sidebarItem = {
     id: "550e8400-e29b-41d4-a716-446655440000",
     rawTextSnippet: "東京は",
@@ -306,13 +337,13 @@ describe("FuriganaSidebarSchema", () => {
   };
 
   it("accepts a valid sidebar projection", () => {
-    const result = FuriganaPaginationResultSchema.parse(sidebarItem);
+    const result = FuriganaPaginationItemSchema.parse(sidebarItem);
 
     expect(result).toEqual(sidebarItem);
   });
 
   it("strips full-row fields such as rawText", () => {
-    const result = FuriganaPaginationResultSchema.parse({
+    const result = FuriganaPaginationItemSchema.parse({
       ...sidebarItem,
       rawText: "東京は素晴らしい",
     });
@@ -321,7 +352,7 @@ describe("FuriganaSidebarSchema", () => {
   });
 
   it("rejects missing rawTextSnippet", () => {
-    const result = FuriganaPaginationResultSchema.safeParse({
+    const result = FuriganaPaginationItemSchema.safeParse({
       id: "550e8400-e29b-41d4-a716-446655440000",
       title: null,
       createdAt: "2026-03-26T12:00:00.000Z",

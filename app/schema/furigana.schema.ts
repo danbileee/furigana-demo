@@ -1,6 +1,7 @@
 import * as z from "zod";
-import { PaginationResultsSchema } from "~/schema/pagination.schema";
+import { CursorPaginationResultsSchema } from "~/schema/pagination.schema";
 import { BaseEntitySchema } from "./base.schema";
+import { MAX_INPUT_LENGTH } from "~/constants/input.const";
 
 /**
  * @schema
@@ -42,43 +43,38 @@ export function isRubyToken(token: FuriganaToken): token is RubyToken {
 
 // --- Database schemas ---
 
-export const FuriganaEntityRowSchema = z.object({
+export const FuriganaRowSchema = z.object({
   ...BaseEntitySchema.shape,
-  rawText: z.string().max(5000),
-  rawTextSnippet: z.string().max(30),
+  rawText: z.string(),
+  rawTextSnippet: z.string(),
   annotationString: z.string(),
   title: z.string().nullable(),
   deletedAt: z.iso.datetime().nullable(),
 });
 
-export type FuriganaEntityRow = z.infer<typeof FuriganaEntityRowSchema>;
+export type FuriganaInferredRow = z.infer<typeof FuriganaRowSchema>;
 
-export const FuriganaEntityInsertSchema = FuriganaEntityRowSchema.extend({
-  title: FuriganaEntityRowSchema.shape.title.optional(),
-  updatedAt: FuriganaEntityRowSchema.shape.updatedAt.optional(),
-}).pick({
-  id: true,
-  rawText: true,
-  rawTextSnippet: true,
-  annotationString: true,
-  title: true,
-  createdAt: true,
-  updatedAt: true,
+export const FuriganaInsertSchema = z.object({
+  ...BaseEntitySchema.shape,
+  rawText: z.string().min(1).max(MAX_INPUT_LENGTH),
+  rawTextSnippet: z.string().min(1).max(30),
+  annotationString: z.string(), // unbounded by design — annotation strings can exceed rawText length due to reading annotations
+  title: z.string().nullable().optional(),
 });
 
-export type FuriganaEntityInsert = z.infer<typeof FuriganaEntityInsertSchema>;
+export type FuriganaInferredInsert = z.infer<typeof FuriganaInsertSchema>;
 
-export const FuriganaPaginationResultSchema = FuriganaEntityRowSchema.pick({
-  id: true,
-  rawTextSnippet: true,
-  title: true,
-  createdAt: true,
+export const FuriganaPaginationItemSchema = z.object({
+  id: z.uuid(),
+  rawTextSnippet: z.string(),
+  title: z.string().nullable(),
+  createdAt: z.iso.datetime(),
 });
 
-export type FuriganaPaginationResult = z.infer<typeof FuriganaPaginationResultSchema>;
+export type FuriganaPaginationItem = z.infer<typeof FuriganaPaginationItemSchema>;
 
-export const FuriganaPaginationResultsSchema = PaginationResultsSchema(
-  FuriganaPaginationResultSchema,
+export const FuriganaPaginationResultsSchema = CursorPaginationResultsSchema(
+  FuriganaPaginationItemSchema,
 );
 
 export type FuriganaPaginationResults = z.infer<typeof FuriganaPaginationResultsSchema>;
