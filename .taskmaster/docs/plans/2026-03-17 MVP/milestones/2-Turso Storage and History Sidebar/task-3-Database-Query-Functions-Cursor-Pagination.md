@@ -844,60 +844,60 @@ These are unit tests (function-level, against in-memory SQLite), not integration
 
 ### Cursor Pagination Service (`app/services/cursor-pagination.service.ts`)
 
-- [ ] Directory `app/services/` exists (may already exist for other services)
-- [ ] `decodeCursor(cursor: string): CursorData` implemented — base64 decode + `CursorSchema.parse`, throws Error or ZodError
-- [ ] `encodeCursor(createdAt: string, id: string): string` implemented — uses `Buffer.from(...).toString("base64")`
-- [ ] Export `CursorData` type for downstream consumers
-- [ ] Export both functions as named exports
-- [ ] No domain-specific knowledge in the service (reusable for any entity)
+- [x] Directory `app/services/` exists (may already exist for other services)
+- [x] `decodeCursor(cursor: string): CursorData` implemented — base64 decode + `CursorSchema.parse`, throws Error or ZodError
+- [x] `encodeCursor(createdAt: string, id: string): string` implemented — uses `Buffer.from(...).toString("base64")`
+- [x] Export `CursorData` type for downstream consumers
+- [x] Export both functions as named exports
+- [x] No domain-specific knowledge in the service (reusable for any entity)
 
 ### Furigana Query Module (`app/lib/db/queries/furigana.query.ts`)
 
-- [ ] Directory `app/lib/db/queries/` created
-- [ ] File `app/lib/db/queries/furigana.query.ts` created with `// Server-only` comment
-- [ ] `DEFAULT_PAGE_LIMIT = 20` constant defined, no magic number in query body
-- [ ] `insertFurigana` implemented — derives `rawTextSnippet`, uses `.returning()`, guards against undefined row
-- [ ] `getFuriganaById` implemented — uses `and(eq, isNull)`, returns `FuriganaRow | null`
-- [ ] `listFuriganas` implemented — imports `decodeCursor`/`encodeCursor` from service, uses row-value `sql` template, `+1` probe, column projection to `{ id, rawTextSnippet, title, createdAt }` only
-- [ ] All three functions exported as named exports
-- [ ] No private helpers (cursor logic delegated to service)
+- [x] Directory `app/lib/db/queries/` created
+- [x] File `app/lib/db/queries/furigana.query.ts` created with `// Server-only` comment
+- [x] `DEFAULT_PAGE_LIMIT = 20` constant defined, no magic number in query body
+- [x] `insertFurigana` implemented — derives `rawTextSnippet`, uses `.returning()`, guards against undefined row
+- [x] `getFuriganaById` implemented — uses `and(eq, isNull)`, returns `FuriganaRow | null`
+- [x] `listFuriganas` implemented — imports `decodeCursor`/`encodeCursor` from service, uses row-value `sql` template, `+1` probe, column projection to `{ id, rawTextSnippet, title, createdAt }` only
+- [x] All three functions exported as named exports
+- [x] No private helpers (cursor logic delegated to service)
 
 ### Testing — P0 (write before implementing, minimum required scenarios)
 
-- [ ] Projection safety: `listFuriganas` items contain only `{ id, rawTextSnippet, title, createdAt }` (Test 6 — P0.1)
-- [ ] Deleted-cursor boundary: next page correct when boundary row is soft-deleted mid-scroll (Test 14 — P0.2)
-- [ ] No rows duplicated or skipped across pages via cursor navigation (Test 10)
-- [ ] Soft-deleted rows excluded from list results (Test 5)
-- [ ] Snippet invariant: `rawTextSnippet === rawText.slice(0, 30)` (Test 2)
-- [ ] Error propagation: malformed cursor does not silently return wrong data (Tests 15, 16)
+- [x] Projection safety: `listFuriganas` items contain only `{ id, rawTextSnippet, title, createdAt }` (Test 6 — P0.1)
+- [x] Deleted-cursor boundary: next page correct when boundary row is soft-deleted mid-scroll (Test 14 — P0.2)
+- [x] No rows duplicated or skipped across pages via cursor navigation (Test 10)
+- [x] Soft-deleted rows excluded from list results (Test 5)
+- [x] Snippet invariant: `rawTextSnippet === rawText.slice(0, 30)` (Test 2)
+- [x] Error propagation: malformed cursor does not silently return wrong data (Tests 15, 16)
 
 ### Testing — P1 (write during implementation, regression shield)
 
-- [ ] Default limit contract: `listFuriganas({})` with 25 rows returns 20 items (Test 7 — P1.1)
-- [ ] `nextCursor` boundary: with `limit = 1`, cursor encodes first visible row not probe row (Test 13 — P1.2)
-- [ ] Duplicate ID insert throws, not swallowed (Test 9 — P1.3)
-- [ ] `updatedAt` auto-populated without caller providing it (Test 8 — P1.4)
-- [ ] Concurrent insert stability: row inserted after cursor capture excluded from next page (Test 11)
-- [ ] `createdAt` collision handled by `id DESC` tiebreaker (Test 12)
+- [x] Default limit contract: `listFuriganas({})` with 25 rows returns 20 items (Test 7 — P1.1)
+- [x] `nextCursor` boundary: with `limit = 1`, cursor encodes first visible row not probe row (Test 13 — P1.2)
+- [x] Duplicate ID insert throws, not swallowed (Test 9 — P1.3)
+- [x] `updatedAt` auto-populated without caller providing it (Test 8 — P1.4)
+- [x] Concurrent insert stability: row inserted after cursor capture excluded from next page (Test 11)
+- [x] `createdAt` collision handled by `id DESC` tiebreaker (Test 12)
 
 ### Testing — P2 (write before PR merge, edge and polish)
 
-- [ ] Empty-string cursor throws `Error` in both `decodeCursor` (Test 6 cursor suite) and `listFuriganas` (Test 17)
-- [ ] Base64-valid non-JSON cursor throws `Error` not `ZodError` (Test 7 cursor suite)
-- [ ] Exactly 30-char `rawText` produces snippet equal to full text, no truncation (Test 6 insert suite — P2.4)
-- [ ] Non-null title stored and returned correctly (Test 7 insert suite — P2.3)
+- [x] Empty-string cursor throws `Error` in both `decodeCursor` (Test 6 cursor suite) and `listFuriganas` (Test 17)
+- [x] Base64-valid non-JSON cursor throws `Error` not `ZodError` (Test 7 cursor suite)
+- [x] Exactly 30-char `rawText` produces snippet equal to full text, no truncation (Test 6 insert suite — P2.4)
+- [x] Non-null title stored and returned correctly (Test 7 insert suite — P2.3)
 
 ### Quality and Integration
 
-- [ ] `pnpm type-check` passes with zero errors
-- [ ] `pnpm exec eslint . --fix` passes with zero warnings
-- [ ] `pnpm test` passes — all unit tests green (both service and query tests)
-- [ ] Verify no `any` or `as` casts in either module
-- [ ] Verify no circular imports:
+- [x] `pnpm type-check` passes with zero errors
+- [x] `pnpm exec eslint . --fix` passes with zero warnings
+- [x] `pnpm test` passes — all unit tests green (both service and query tests)
+- [x] Verify no `any` or `as` casts in either module
+- [x] Verify no circular imports:
   - `cursor-pagination.service.ts` has no database dependencies
   - `furigana.query.ts` imports from `cursor-pagination.service.ts` (one-way)
   - No module imports `furigana.query.ts` except route/action call sites
-- [ ] Import paths in route/action modules updated to use new paths:
+- [x] Import paths in route/action modules updated to use new paths:
   ```typescript
   import { insertFurigana, listFuriganas } from "~/lib/db/queries/furigana.query";
   ```
