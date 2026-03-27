@@ -48,6 +48,15 @@ describe("baseColumns structure", () => {
     );
   });
 
+  it("wires $defaultFn on updatedAt returning ISO string", () => {
+    const columns = getTableColumns(baseTestTable);
+
+    expect(columns.updatedAt.defaultFn).toBeTypeOf("function");
+    expect(columns.updatedAt.defaultFn?.()).toMatch(
+      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/,
+    );
+  });
+
   it("does NOT wire $onUpdateFn on createdAt", () => {
     const columns = getTableColumns(baseTestTable);
 

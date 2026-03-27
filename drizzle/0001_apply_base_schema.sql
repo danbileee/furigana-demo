@@ -22,7 +22,7 @@ INSERT INTO `__new_furiganas` (
 SELECT
 	`id`,
 	`created_at`,
-	`created_at`,
+	`created_at`, -- Intentional bootstrap: initialize updated_at to created_at for migrated rows.
 	`raw_text`,
 	`raw_text_snippet`,
 	`annotation_string`,
