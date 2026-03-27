@@ -1,7 +1,6 @@
 import { vi } from "vitest";
-import { MAX_INPUT_LENGTH } from "~/constants/input.const";
 import type { FuriganaToken } from "~/schema/furigana.schema";
-import { NON_JAPANESE_INPUT_ERROR } from "~/constants/furigana.const";
+import { NON_JAPANESE_INPUT_ERROR, MAX_FURIGANA_INPUT_LENGTH } from "~/constants/furigana.const";
 
 const { mockGenerateFurigana } = vi.hoisted(() => ({
   mockGenerateFurigana: vi.fn(),
@@ -102,11 +101,11 @@ describe("home action", () => {
   });
 
   it("returns an error for over-limit text", async () => {
-    const overLimitText = "漢".repeat(MAX_INPUT_LENGTH + 1);
+    const overLimitText = "漢".repeat(MAX_FURIGANA_INPUT_LENGTH + 1);
     const result = await action(createActionArgs(createFormRequest(overLimitText)));
 
     expect(result).toEqual({
-      error: `Text exceeds ${MAX_INPUT_LENGTH.toLocaleString()} character limit.`,
+      error: `Text exceeds ${MAX_FURIGANA_INPUT_LENGTH.toLocaleString()} character limit.`,
       originalText: overLimitText,
     });
     expect(mockGenerateFurigana).not.toHaveBeenCalled();

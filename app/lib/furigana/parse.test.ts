@@ -1,4 +1,4 @@
-import { MAX_INPUT_LENGTH } from "~/constants/input.const";
+import { MAX_FURIGANA_INPUT_LENGTH } from "~/constants/furigana.const";
 import { parseAnnotationString } from "~/lib/furigana/parse";
 
 describe("parseAnnotationString", () => {
@@ -229,7 +229,7 @@ describe("parseAnnotationString", () => {
 
   describe("performance and encoding", () => {
     it("parses a max-length pure text input as one text token", () => {
-      const input = "あ".repeat(MAX_INPUT_LENGTH);
+      const input = "あ".repeat(MAX_FURIGANA_INPUT_LENGTH);
 
       expect(parseAnnotationString(input)).toEqual([{ type: "text", value: input }]);
     });

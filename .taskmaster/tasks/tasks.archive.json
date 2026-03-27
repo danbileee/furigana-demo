@@ -228,6 +228,22 @@
         "recommendedSubtasks": 5,
         "expansionPrompt": "Break down schema creation into: (1) Create app/schema/pagination.schema.ts with CursorSchema (ISO datetime + UUID validation) and test cursor validation edge cases; (2) Implement generic PaginationResultsSchema factory function that accepts any Zod schema T and returns { data: T[], nextCursor: string | null, hasMore: boolean } shape with proper TypeScript generics; (3) Export TypeScript utility types CursorPaginationParams and PaginationResults<T>; (4) Extend app/schema/furigana.schema.ts using createSelectSchema and createInsertSchema from drizzle-orm/zod, ensuring compatibility with existing Zod 4.0 schemas; (5) Create refined schemas (FuriganaRowSchema with UUID/datetime refinements, FuriganaInsertSchema with length validations max 5000/30 chars, FuriganaSidebarSchema manual projection, FuriganaPaginationResultsSchema composition) with comprehensive test coverage",
         "archivedAt": "2026-03-26T12:59:08.107Z"
+      },
+      {
+        "id": "3",
+        "title": "Database Query Functions with Cursor Pagination",
+        "description": "Implement typed Drizzle query functions for insert, single fetch, and cursor-paginated list retrieval using row-value comparison",
+        "details": "Create app/lib/db/queries.ts with insertFurigana() that accepts FuriganaInsert shape, computes rawTextSnippet as rawText.slice(0, 30), and inserts into furiganas table using Drizzle ORM. Implement getFuriganaById(id) that selects from furiganas WHERE id = :id AND deleted_at IS NULL, returning FuriganaRow | null. Implement listFuriganas({ cursor, limit }) with cursor-based pagination using row-value comparison: for first page (no cursor) ORDER BY created_at DESC, id DESC LIMIT :limit + 1; for subsequent pages WHERE (created_at, id) < (:cursorCreatedAt, :cursorId) AND deleted_at IS NULL ORDER BY created_at DESC, id DESC LIMIT :limit + 1. Decode base64 cursor to { createdAt, id } and validate with CursorSchema. Return { data: FuriganaSidebar[], nextCursor: string | null, hasMore: boolean } where nextCursor is base64-encoded cursor of the last item if more rows exist. No total COUNT(*) field.",
+        "testStrategy": "Unit tests with in-memory SQLite (':memory:'). Test insertFurigana correctly writes entry and computes rawTextSnippet from rawText.slice(0, 30). Test getFuriganaById returns entry when exists and not soft-deleted, returns null for non-existent ID or soft-deleted entry. Test listFuriganas first page returns correct entries ordered by created_at DESC, id DESC. Test listFuriganas with valid cursor returns next page. Test listFuriganas returns nextCursor when more entries exist and null when on last page. Test hasMore is true/false correctly. Verify no total field in response. Test cursor stability: new inserts don't affect cursor-based traversal of older entries.",
+        "priority": "high",
+        "dependencies": ["1", "2"],
+        "status": "done",
+        "subtasks": [],
+        "complexity": 8,
+        "recommendedSubtasks": 5,
+        "expansionPrompt": "Break down query implementation into: (1) Create app/lib/db/queries.ts with insertFurigana() function that computes rawTextSnippet as rawText.slice(0, 30) and validates input via FuriganaInsertSchema before INSERT; (2) Implement getFuriganaById(id) with WHERE id = :id AND deleted_at IS NULL clause returning FuriganaRow | null; (3) Implement listFuriganas() first-page query (no cursor) with ORDER BY created_at DESC, id DESC LIMIT :limit + 1; (4) Implement listFuriganas() cursor-based query using row-value comparison WHERE (created_at, id) < (:cursorCreatedAt, :cursorId) AND deleted_at IS NULL with proper base64 cursor encoding/decoding and CursorSchema validation; (5) Write comprehensive unit tests with in-memory SQLite (':memory:') covering pagination edge cases (first page, subsequent pages, last page detection via +1 fetch), cursor stability across concurrent inserts, soft-delete filtering, and nextCursor/hasMore correctness",
+        "updatedAt": "2026-03-27T09:14:50.046Z",
+        "archivedAt": "2026-03-27T09:14:55.605Z"
       }
     ]
   }

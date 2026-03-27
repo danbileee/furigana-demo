@@ -15,7 +15,7 @@ export function CursorPaginationResultsSchema<S extends z.ZodTypeAny>(itemSchema
 
 export const CursorPaginationParamsSchema = z.object({
   cursor: z.string().optional(),
-  limit: z.number().optional(),
+  limit: z.number().int().min(1).max(100).optional(),
 });
 
 export type CursorPaginationParams = z.infer<typeof CursorPaginationParamsSchema>;
