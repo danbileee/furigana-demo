@@ -33,5 +33,6 @@ Milestone 1 — Core Generation Loop (`1-Core Generation Loop/`):
 Milestone 2 — Turso Storage and History Sidebar (`2-Turso Storage and History Sidebar/`):
 
 - `task-1-Database-Foundation-Setup.md`
+- `task-2-Generic-Pagination-and-Domain-Schemas.md`
 
 The date flag pattern is `2026-03-17` and the full directory name is `2026-03-17 MVP`.

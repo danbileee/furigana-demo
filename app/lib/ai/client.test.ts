@@ -1,5 +1,4 @@
 import OpenAI from "openai";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 describe("openaiClient", () => {
   const originalApiKey = process.env["OPENAI_API_KEY"];

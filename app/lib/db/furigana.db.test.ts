@@ -1,16 +1,16 @@
 import { getTableColumns } from "drizzle-orm";
 import { getTableConfig } from "drizzle-orm/sqlite-core";
-import { describe, expect, it } from "vitest";
 
-import { furiganas, type Furigana, type NewFurigana } from "~/lib/db/furigana.db";
+import { furiganas, type FuriganaRow, type FuriganaInsert } from "~/lib/db/furigana.db";
 
 const EXPECTED_COLUMN_KEYS = [
   "id",
+  "createdAt",
+  "updatedAt",
   "rawText",
   "rawTextSnippet",
   "annotationString",
   "title",
-  "createdAt",
   "deletedAt",
 ] as const;
 
@@ -47,7 +47,7 @@ const readIndexColumnParts = (indexColumn: unknown): string[] => {
 };
 
 describe("furiganas schema structure", () => {
-  it("has exactly the expected 7 columns", () => {
+  it("has exactly the expected 8 columns", () => {
     const columns = getTableColumns(furiganas);
 
     expect(Object.keys(columns)).toEqual(EXPECTED_COLUMN_KEYS);
@@ -73,6 +73,7 @@ describe("furiganas schema structure", () => {
     expect(columns.rawTextSnippet.notNull).toBe(true);
     expect(columns.annotationString.notNull).toBe(true);
     expect(columns.createdAt.notNull).toBe(true);
+    expect(columns.updatedAt.notNull).toBe(true);
   });
 
   it("keeps nullable columns nullable", () => {
@@ -82,11 +83,11 @@ describe("furiganas schema structure", () => {
     expect(columns.deletedAt.notNull).not.toBe(true);
   });
 
-  it("stores all 7 fields as text columns", () => {
+  it("stores all 8 fields as text columns", () => {
     const columns = getTableColumns(furiganas);
     const sqlTypes = EXPECTED_COLUMN_KEYS.map((key) => columns[key].getSQLType());
 
-    expect(sqlTypes).toEqual(["text", "text", "text", "text", "text", "text", "text"]);
+    expect(sqlTypes).toEqual(["text", "text", "text", "text", "text", "text", "text", "text"]);
   });
 
   it("defines the unique partial cursor index with the expected name", () => {
@@ -124,13 +125,14 @@ describe("furiganas schema structure", () => {
   });
 
   it("exports stable Furigana and NewFurigana TypeScript types", () => {
-    const row: Furigana = {
+    const row: FuriganaRow = {
       id: "row-id",
       rawText: "raw",
       rawTextSnippet: "snippet",
       annotationString: "annotation",
       title: null,
       createdAt: "2026-03-26T00:00:00.000Z",
+      updatedAt: "2026-03-26T00:00:00.000Z",
       deletedAt: null,
     };
 
@@ -141,10 +143,11 @@ describe("furiganas schema structure", () => {
       annotationString: string;
       title: string | null;
       createdAt: string;
+      updatedAt: string;
       deletedAt: string | null;
     } = row;
 
-    const insertShape: NewFurigana = {
+    const insertShape: FuriganaInsert = {
       id: "new-id",
       rawText: "raw",
       rawTextSnippet: "snippet",

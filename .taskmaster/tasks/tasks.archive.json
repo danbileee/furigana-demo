@@ -212,6 +212,22 @@
         "subtasks": [],
         "updatedAt": "2026-03-26T08:02:32.273Z",
         "archivedAt": "2026-03-26T08:02:37.504Z"
+      },
+      {
+        "id": "2",
+        "title": "Generic Pagination and Domain Schemas",
+        "description": "Create reusable pagination schemas and extend furigana domain schemas with database row types using drizzle-orm/zod",
+        "details": "Create app/schema/pagination.schema.ts with CursorSchema (validates { createdAt: ISO datetime, id: UUID }), generic PaginationResultsSchema factory function accepting any Zod schema and returning pagination envelope ({ data: T[], nextCursor: string | null, hasMore: boolean }), CursorPaginationParams and PaginationResults<T> TypeScript utility types. Extend app/schema/furigana.schema.ts using createSelectSchema and createInsertSchema from drizzle-orm/zod to generate base schemas from the Drizzle table, then refine with domain validations. Add FuriganaRowSchema (full SELECT * shape with UUID and datetime refinements), FuriganaInsertSchema (rawText max 5000 chars, rawTextSnippet max 30 chars), FuriganaSidebarSchema (manual projection with id, rawTextSnippet, title nullable, createdAt), and FuriganaPaginationResultsSchema composed via PaginationResultsSchema(FuriganaSidebarSchema). Export TypeScript types for each schema.",
+        "testStrategy": "Unit tests for CursorSchema validate correct cursor shapes and reject malformed data (missing fields, invalid types). Test PaginationResultsSchema factory with simple test schemas validates envelope structure (data array, nextCursor, hasMore) and rejects invalid shapes. Verify no total field is accepted. Test FuriganaInsertSchema rejects rawText over 5000 chars and rawTextSnippet over 30 chars. Test FuriganaRowSchema accepts valid database rows. Test FuriganaSidebarSchema validates sidebar projections. Test FuriganaPaginationResultsSchema composed schema validates paginated sidebar responses correctly.",
+        "priority": "high",
+        "dependencies": ["1"],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2026-03-26T12:58:56.670Z",
+        "complexity": 7,
+        "recommendedSubtasks": 5,
+        "expansionPrompt": "Break down schema creation into: (1) Create app/schema/pagination.schema.ts with CursorSchema (ISO datetime + UUID validation) and test cursor validation edge cases; (2) Implement generic PaginationResultsSchema factory function that accepts any Zod schema T and returns { data: T[], nextCursor: string | null, hasMore: boolean } shape with proper TypeScript generics; (3) Export TypeScript utility types CursorPaginationParams and PaginationResults<T>; (4) Extend app/schema/furigana.schema.ts using createSelectSchema and createInsertSchema from drizzle-orm/zod, ensuring compatibility with existing Zod 4.0 schemas; (5) Create refined schemas (FuriganaRowSchema with UUID/datetime refinements, FuriganaInsertSchema with length validations max 5000/30 chars, FuriganaSidebarSchema manual projection, FuriganaPaginationResultsSchema composition) with comprehensive test coverage",
+        "archivedAt": "2026-03-26T12:59:08.107Z"
       }
     ]
   }

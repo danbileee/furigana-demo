@@ -1,4 +1,7 @@
 import * as z from "zod";
+import { CursorPaginationResultsSchema } from "~/schema/pagination.schema";
+import { BaseEntitySchema } from "./base.schema";
+import { MAX_INPUT_LENGTH } from "~/constants/input.const";
 
 /**
  * @schema
@@ -37,3 +40,41 @@ export function isTextToken(token: FuriganaToken): token is TextToken {
 export function isRubyToken(token: FuriganaToken): token is RubyToken {
   return token.type === "ruby";
 }
+
+// --- Database schemas ---
+
+export const FuriganaRowSchema = z.object({
+  ...BaseEntitySchema.shape,
+  rawText: z.string(),
+  rawTextSnippet: z.string(),
+  annotationString: z.string(),
+  title: z.string().nullable(),
+  deletedAt: z.iso.datetime().nullable(),
+});
+
+export type FuriganaInferredRow = z.infer<typeof FuriganaRowSchema>;
+
+export const FuriganaInsertSchema = z.object({
+  ...BaseEntitySchema.shape,
+  rawText: z.string().min(1).max(MAX_INPUT_LENGTH),
+  rawTextSnippet: z.string().min(1).max(30),
+  annotationString: z.string(), // unbounded by design — annotation strings can exceed rawText length due to reading annotations
+  title: z.string().nullable().optional(),
+});
+
+export type FuriganaInferredInsert = z.infer<typeof FuriganaInsertSchema>;
+
+export const FuriganaPaginationItemSchema = z.object({
+  id: z.uuid(),
+  rawTextSnippet: z.string(),
+  title: z.string().nullable(),
+  createdAt: z.iso.datetime(),
+});
+
+export type FuriganaPaginationItem = z.infer<typeof FuriganaPaginationItemSchema>;
+
+export const FuriganaPaginationResultsSchema = CursorPaginationResultsSchema(
+  FuriganaPaginationItemSchema,
+);
+
+export type FuriganaPaginationResults = z.infer<typeof FuriganaPaginationResultsSchema>;
