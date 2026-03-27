@@ -8,7 +8,10 @@ import * as schema from "~/lib/db/schema";
 import { decodeCursor } from "~/services/cursor-pagination.service";
 
 type TestDb = LibSQLDatabase<typeof schema>;
-type InsertInput = Omit<FuriganaInsert, "rawTextSnippet">;
+type InsertInput = Pick<
+  FuriganaInsert,
+  "id" | "rawText" | "annotationString" | "createdAt" | "title"
+>;
 
 const mockDbRef: { current: TestDb | null } = { current: null };
 
@@ -161,7 +164,12 @@ describe("furigana query functions", () => {
 
       await expect(
         insertFurigana(makeInput(90, { id: duplicateId, rawText: "second" })),
-      ).rejects.toThrow();
+      ).rejects.toMatchObject({
+        message: expect.stringMatching(/^Failed query: insert into "furiganas"/),
+        cause: expect.objectContaining({
+          message: expect.stringMatching(/UNIQUE constraint failed/i),
+        }),
+      });
     });
   });
 
@@ -392,7 +400,7 @@ describe("furigana query functions", () => {
       expect(new Set(seenIds).size).toBe(10);
     });
 
-    it("excludes rows inserted after cursor capture from subsequent page", async () => {
+    it("does not surface a late-inserted row with a newer timestamp on pages bounded by an older cursor", async () => {
       const { insertFurigana, listFuriganas } = await loadQueryModule();
 
       for (let index = 1; index <= 5; index += 1) {
@@ -447,11 +455,12 @@ describe("furigana query functions", () => {
       await insertFurigana(makeInput(1201));
       await insertFurigana(makeInput(1202));
       await insertFurigana(makeInput(1203));
+      await insertFurigana(makeInput(1204));
 
-      const firstPage = await listFuriganas({ limit: 1 });
+      const firstPage = await listFuriganas({ limit: 2 });
       const decodedCursor = firstPage.nextCursor ? decodeCursor(firstPage.nextCursor) : null;
 
-      expect(firstPage.data).toHaveLength(1);
+      expect(firstPage.data).toHaveLength(2);
       expect(firstPage.hasMore).toBe(true);
       expect(decodedCursor).toEqual({
         createdAt: createdAtFor(1203),
@@ -460,10 +469,10 @@ describe("furigana query functions", () => {
 
       const secondPage = await listFuriganas({
         cursor: firstPage.nextCursor ?? undefined,
-        limit: 1,
+        limit: 2,
       });
 
-      expect(secondPage.data[0]?.id).toBe(idFor(1202));
+      expect(secondPage.data.map((row) => row.id)).toEqual([idFor(1202), idFor(1201)]);
     });
 
     it("keeps pagination correct when boundary cursor row is soft-deleted", async () => {
