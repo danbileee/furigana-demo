@@ -586,11 +586,77 @@ const _zodInsertToDrizzle = {} as FuriganaInsert satisfies NewFurigana;
 
 ---
 
+## Scope Changes and Trade-offs
+
+### What the Task Plan Excluded
+
+The original task plan explicitly scoped to hand-written Zod schemas derived field-by-field from the Drizzle `$inferSelect`/`$inferInsert` types. The plan made no mention of:
+
+- A shared `BaseEntitySchema` abstraction (or any base schema layer)
+- A `base.schema.ts` file
+- An `updatedAt` column in the `furiganas` table
+- Schema inheritance or field spreading between domain schemas and a base type
+
+The plan also specified `FuriganaSidebarSchema` as the name for the sidebar projection schema, `PaginationResultsSchema` as the factory name, and `FuriganaRow` / `FuriganaInsert` as the exported inferred type names.
+
+### What the PR Actually Implemented
+
+The implementation introduced additional foundational infrastructure beyond the original scope:
+
+**New file: `app/schema/base.schema.ts`**
+
+```typescript
+export const BaseEntitySchema = z.object({
+  id: z.uuid(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
+});
+export type BaseEntity = z.infer<typeof BaseEntitySchema>;
+```
+
+**Schema inheritance via object spread**: Both `FuriganaRowSchema` and `FuriganaInsertSchema` spread `BaseEntitySchema.shape` rather than repeating `id` and `createdAt` inline. `CursorSchema` is derived via `BaseEntitySchema.pick({ id: true, createdAt: true })` rather than being defined independently.
+
+**`updatedAt` column added to the production schema**: `BaseEntitySchema` includes `updatedAt: z.iso.datetime()`, which means the Drizzle table definition was also updated to add an `updatedAt` column. This results in a database migration that creates an `updated_at` column in the `furiganas` table.
+
+**Naming changes from plan to implementation**:
+
+| Plan Name                             | Shipped Name                                                            |
+| ------------------------------------- | ----------------------------------------------------------------------- |
+| `PaginationResultsSchema` (factory)   | `CursorPaginationResultsSchema`                                         |
+| `FuriganaSidebarSchema`               | `FuriganaPaginationItemSchema`                                          |
+| `FuriganaRow` (inferred type)         | `FuriganaInferredRow`                                                   |
+| `FuriganaInsert` (inferred type)      | `FuriganaInferredInsert`                                                |
+| `PaginationResults<T>`                | `CursorPaginationResults<T>`                                            |
+| `CursorPaginationParams` (plain type) | `CursorPaginationParams` (inferred from `CursorPaginationParamsSchema`) |
+
+`CursorPaginationParamsSchema` was introduced as a Zod schema instance (not just a TypeScript type), making `CursorPaginationParams` a derived type rather than a hand-written one.
+
+### Why This Trade-off Was Made
+
+The `BaseEntitySchema` abstraction is well-executed. Spreading `BaseEntitySchema.shape` into domain schemas eliminates repeated `id`/`createdAt` definitions and ensures that all entities that share the same base columns stay in sync automatically. Deriving `CursorSchema` from `BaseEntitySchema.pick(...)` is a tighter and less error-prone definition than a standalone object — if the cursor fields ever change type, the pick reflects it automatically.
+
+The `updatedAt` column is reasonable forward-looking infrastructure. Most production entities need an `updated_at` column for audit trails, cache invalidation, and optimistic concurrency. Adding it now, when the table has no live user data, is materially cheaper than adding it later via a migration that needs to backfill values for existing rows.
+
+The naming changes (`CursorPaginationResultsSchema`, `FuriganaPaginationItemSchema`, `FuriganaInferredRow`, `FuriganaInferredInsert`) are more precise: the `Cursor` prefix on the pagination types makes the pagination strategy explicit at the type level, and the `Inferred` qualifier on the row/insert types avoids any ambiguity with potential future ORM-generated types.
+
+### Implications
+
+**Irreversible schema migration**: The `updatedAt` column is a production schema change. Once the migration is applied and data is written, removing the column requires another migration with a table-rebuild (SQLite limitation). This was not in the original task scope and was not flagged as a migration decision in the plan. Future tasks that extend the `furiganas` table should treat `updatedAt` as a first-class column and populate it correctly in UPDATE statements.
+
+**`BaseEntitySchema` is now a foundational pattern**: All future domain schemas in `app/schema/` are expected to use `BaseEntitySchema` as the base for any entity that maps to a database row with `id`, `createdAt`, and `updatedAt`. Introducing a new entity schema without spreading `BaseEntitySchema.shape` will be inconsistent with this established pattern.
+
+**Drizzle type alignment tests need updating**: The `satisfies` alignment tests in `furigana.schema.test.ts` must align against the `Furigana` Drizzle type that now includes `updatedAt`. Any test or type that was written against the pre-`updatedAt` schema shape needs to be verified against the current Drizzle-inferred types.
+
+**Downstream consumers use the new names**: Tasks 3, 8, and 9 must reference `CursorPaginationResultsSchema`, `FuriganaPaginationItemSchema`, and `FuriganaInferredRow`/`FuriganaInferredInsert` — not the names listed in their original task plans.
+
+---
+
 ## Implementation Checklist
 
-- [x] `app/schema/pagination.schema.ts` created with `CursorSchema`, `PaginationResultsSchema`, `CursorPaginationParams`, `PaginationResults<T>`
+- [x] `app/schema/base.schema.ts` created with `BaseEntitySchema` and `BaseEntity` type (scope addition — not in original plan)
+- [x] `app/schema/pagination.schema.ts` created with `CursorSchema`, `CursorPaginationResultsSchema`, `CursorPaginationParamsSchema`, `CursorPaginationParams`, `CursorPaginationResults<T>`
 - [x] `app/schema/pagination.schema.test.ts` created with all `CursorSchema` and factory test cases (including `nextCursor` absent rejection and `data` non-array rejection)
-- [x] `app/schema/furigana.schema.ts` extended with `FuriganaRowSchema`, `FuriganaInsertSchema`, `FuriganaSidebarSchema`, `FuriganaPaginationResultsSchema` and their inferred types
+- [x] `app/schema/furigana.schema.ts` extended with `FuriganaRowSchema`, `FuriganaInsertSchema`, `FuriganaPaginationItemSchema`, `FuriganaPaginationResultsSchema` and their inferred types
 - [x] `app/schema/furigana.schema.test.ts` extended with Drizzle type alignment suite and DB schema test suites (existing tests untouched)
 - [x] Vitest coverage config verified to include `app/schema/**/*.ts` (Phase 3 check)
 - [x] `pnpm type-check` passes with zero errors
