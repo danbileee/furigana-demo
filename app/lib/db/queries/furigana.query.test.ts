@@ -5,7 +5,7 @@ import { pushSQLiteSchema } from "drizzle-kit/api";
 import { ZodError } from "zod";
 import { furiganas, type FuriganaInsert } from "~/lib/db/furigana.db";
 import * as schema from "~/lib/db/schema";
-import { decodeCursor } from "~/services/cursor-pagination.service";
+import { decodeCursor } from "~/services/pagination.service";
 
 type TestDb = LibSQLDatabase<typeof schema>;
 type InsertInput = Pick<

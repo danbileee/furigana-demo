@@ -1,5 +1,5 @@
 import { ZodError } from "zod";
-import { decodeCursor, encodeCursor } from "./cursor-pagination.service";
+import { decodeCursor, encodeCursor } from "./pagination.service";
 
 describe("cursor pagination service", () => {
   it("encodeCursor produces a decodable base64 string", () => {

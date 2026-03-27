@@ -5,7 +5,7 @@ import { db } from "~/lib/db/client";
 import { furiganas, type FuriganaInsert, type FuriganaRow } from "~/lib/db/furigana.db";
 import type { CursorPaginationParams, CursorPaginationResults } from "~/schema/pagination.schema";
 import type { FuriganaPaginationItem } from "~/schema/furigana.schema";
-import { decodeCursor, encodeCursor } from "~/services/cursor-pagination.service";
+import { decodeCursor, encodeCursor } from "~/services/pagination.service";
 
 type InsertFuriganaInput = Pick<
   FuriganaInsert,
