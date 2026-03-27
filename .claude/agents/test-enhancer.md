@@ -2,7 +2,7 @@
 name: test-enhancer
 description: "Use this agent when you need to review and improve test strategies for a feature or milestone. This agent analyzes your test plan, understands the milestone context and goals, and provides practical enhancements based on industry best practices with specific improved test cases. Examples:\\n\\n<example>\\nContext: You've written a plan for implementing a new furigana display mode feature.\\nuser: \"I'm planning to add a 'compact view' mode for furigana. Here's my test strategy: unit tests for the view mode toggle, and a couple of E2E tests for the UI. Can you review this?\"\\nassistant: \"I'll use the test-enhancer agent to review your test strategy and suggest improvements.\"\\n<function call to launch test-enhancer agent>\\n</example>\\n\\n<example>\\nContext: A milestone is defined for improving performance of kanji processing.\\nuser: \"We're optimizing the kanji processing pipeline for better performance. What should our testing approach look like?\"\\nassistant: \"Let me use the test-enhancer agent to analyze the testing needs for this performance milestone.\"\\n<function call to launch test-enhancer agent>\\n</example>"
 tools: Bash, CronCreate, CronDelete, CronList, EnterWorktree, ExitWorktree, Glob, Grep, Read, RemoteTrigger, SendMessage, Skill, TaskCreate, TaskGet, TaskList, TaskUpdate, TeamCreate, TeamDelete, ToolSearch, WebFetch, WebSearch, mcp__context7, mcp__ide__executeCode, mcp__ide__getDiagnostics, mcp__playwright, mcp__task-master-ai
-model: opus
+model: sonnet
 color: yellow
 memory: project
 ---
