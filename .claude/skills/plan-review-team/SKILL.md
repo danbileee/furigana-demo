@@ -1,6 +1,6 @@
 ---
-name: document-review-team
-description: Orchestrate a specialized team of expert reviewers to evaluate documents (PRDs, milestone specs, roadmaps, design docs). Each reviewer independently analyzes the document against roadmap alignment, scope feasibility, and codebase patterns, then collaborates to resolve conflicts and produce a unified executive report. Use this whenever you need rigorous document validation before committing resources.
+name: plan-review-team
+description: Orchestrate a specialized team of expert reviewers to evaluate plan documents (PRDs, milestone specs, roadmaps, design docs). Each reviewer independently analyzes the document against roadmap alignment, scope feasibility, and codebase patterns, then collaborates to resolve conflicts and produce a unified executive report. Use this whenever you need rigorous document validation before committing resources.
 compatibility: Requires Claude Code with agent spawning capability. All reviewers use Claude Sonnet.
 ---
 
