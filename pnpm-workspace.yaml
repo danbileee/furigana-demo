@@ -1,0 +1,11 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+onlyBuiltDependencies:
+  - esbuild
+  - "@sentry/profiling-node"
+  - "@sentry-internal/node-cpu-profiler"
+  - "@nestjs/core"
+  - unrs-resolver
+  - msw
